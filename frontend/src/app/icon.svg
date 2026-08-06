@@ -7,5 +7,15 @@
     </linearGradient>
   </defs>
   <rect width="64" height="64" rx="14" fill="url(#brand)"/>
-  <path d="M33.6 16 17.6 35.2h11.2l-1.6 12.8 19.2-24.4H33.6z" fill="#fff"/>
+  <g transform="translate(8.96 8.96) scale(1.92)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/>
+    <path d="M9 13a4.5 4.5 0 0 0 3-4"/>
+    <path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/>
+    <path d="M3.477 10.896a4 4 0 0 1 .585-.396"/>
+    <path d="M6 18a4 4 0 0 1-1.967-.516"/>
+    <path d="M12 13h4"/>
+    <path d="M12 18h6a2 2 0 0 1 0 4h-6a2 2 0 0 1 0-4Z"/>
+    <path d="M12 8V8"/>
+    <path d="M16 5h6a2 2 0 0 1 0 4h-6a2 2 0 0 1 0-4Z"/>
+  </g>
 </svg>
