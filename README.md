@@ -16,15 +16,9 @@ Validate your startup idea in minutes with a swarm of specialized AI agents that
 
 <br>
 
-[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs&logoColor=white&style=for-the-badge)](https://nextjs.org)
-[![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white&style=for-the-badge)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white&style=for-the-badge)](https://www.typescriptlang.org)
-[![Tailwind](https://img.shields.io/badge/Tailwind%20CSS-4-38bdf8?logo=tailwindcss&logoColor=white&style=for-the-badge)](https://tailwindcss.com)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs&logoColor=white&style=for-the-badge)](https://nextjs.org) [![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white&style=for-the-badge)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white&style=for-the-badge)](https://www.typescriptlang.org) [![Tailwind](https://img.shields.io/badge/Tailwind%20CSS-4-38bdf8?logo=tailwindcss&logoColor=white&style=for-the-badge)](https://tailwindcss.com)
 
-[![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white&style=for-the-badge)](https://fastapi.tiangolo.com)
-[![Python](https://img.shields.io/badge/Python-3.10+-3776ab?logo=python&logoColor=white&style=for-the-badge)](https://www.python.org)
-[![Groq](https://img.shields.io/badge/Groq%20Llama%203.3-f55036?style=for-the-badge)](https://groq.com)
-[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white&style=for-the-badge)](https://fastapi.tiangolo.com) [![Python](https://img.shields.io/badge/Python-3.10+-3776ab?logo=python&logoColor=white&style=for-the-badge)](https://www.python.org) [![Groq](https://img.shields.io/badge/Groq%20Llama%203.3-f55036?style=for-the-badge)](https://groq.com) [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
 <br>
 
@@ -41,39 +35,50 @@ Validate your startup idea in minutes with a swarm of specialized AI agents that
 
 ---
 
-## Table of Contents
+## Table of Contents ![Table of Contents](https://img.shields.io/badge/Table%20of%20Contents-64748b?style=flat-square&logo=list&logoColor=white)
 
-1. [Overview](#overview)
-2. [How It Works](#how-it-works)
-3. [The Agent Swarm](#the-agent-swarm)
-4. [Key Features](#key-features)
-5. [Use Cases](#use-cases)
-6. [Tech Stack](#tech-stack)
-7. [Repository Structure](#repository-structure)
-8. [Quick Start](#quick-start)
-9. [Environment Variables](#environment-variables)
-10. [API Reference](#api-reference)
-11. [Data Model](#data-model)
-12. [Testing & Quality](#testing--quality)
-13. [Deployment](#deployment)
-14. [Security](#security)
-15. [Roadmap](#roadmap)
-16. [FAQ](#faq)
-17. [Contributing](#contributing)
-18. [Author & License](#author--license)
+- [StartupLaunch AI](#startuplaunch-ai)
+    - [Autonomous AI Agent Swarms — Instant Startup Idea Validation](#autonomous-ai-agent-swarms--instant-startup-idea-validation)
+  - [Table of Contents ](#table-of-contents-)
+  - [Overview ](#overview-)
+  - [How It Works ](#how-it-works-)
+  - [The Agent Swarm ](#the-agent-swarm-)
+  - [Key Features ](#key-features-)
+  - [Use Cases ](#use-cases-)
+  - [Tech Stack ](#tech-stack-)
+  - [Repository Structure ](#repository-structure-)
+  - [Quick Start ](#quick-start-)
+      - [Backend — FastAPI](#backend--fastapi)
+      - [Frontend — Next.js](#frontend--nextjs)
+  - [Environment Variables ](#environment-variables-)
+      - [Backend — `backend/.env`](#backend--backendenv)
+      - [Frontend — `frontend/.env.local`](#frontend--frontendenvlocal)
+  - [API Reference ](#api-reference-)
+  - [Data Model ](#data-model-)
+  - [Testing \& Quality ](#testing--quality-)
+      - [Backend — pytest](#backend--pytest)
+      - [Frontend — quality gates](#frontend--quality-gates)
+  - [Deployment ](#deployment-)
+      - [Frontend → Vercel](#frontend--vercel)
+      - [Backend → Railway / Render / Fly.io](#backend--railway--render--flyio)
+  - [Security ](#security-)
+  - [Roadmap ](#roadmap-)
+  - [FAQ ](#faq-)
+  - [Contributing ](#contributing-)
+  - [Author \& License ](#author--license-)
 
 ---
 
-## Overview
+## Overview ![Overview](https://img.shields.io/badge/Overview-6366f1?style=flat-square&logo=eye&logoColor=white)
 
 Most founders validate ideas with gut feel, biased friends, or expensive consultants. StartupLaunch AI replaces that with a **repeatable, autonomous research pipeline** that runs in seconds and returns the kind of decision-grade intelligence you would expect from a top-tier venture research team.
 
-| Traditional validation | StartupLaunch AI |
-| --- | --- |
-| Weeks of manual research | **Minutes** of autonomous swarm execution |
-| One opinion at a time | **4 specialized agents** running in parallel |
-| Biased, unstructured notes | **Structured, decision-ready JSON reports** |
-| Gut-feel verdicts | **Evidence-backed Go / No-Go / Pivot decision** |
+| Traditional validation     | StartupLaunch AI                                |
+| -------------------------- | ----------------------------------------------- |
+| Weeks of manual research   | **Minutes** of autonomous swarm execution       |
+| One opinion at a time      | **4 specialized agents** running in parallel    |
+| Biased, unstructured notes | **Structured, decision-ready JSON reports**     |
+| Gut-feel verdicts          | **Evidence-backed Go / No-Go / Pivot decision** |
 
 **What's inside the box**
 
@@ -89,7 +94,7 @@ Most founders validate ideas with gut feel, biased friends, or expensive consult
 
 ---
 
-## How It Works
+## How It Works ![How It Works](https://img.shields.io/badge/How%20It%20Works-06b6d4?style=flat-square&logo=workflow&logoColor=white)
 
 <table>
 <tr>
@@ -118,7 +123,7 @@ Most founders validate ideas with gut feel, biased friends, or expensive consult
 
 ---
 
-## The Agent Swarm
+## The Agent Swarm ![The Agent Swarm](https://img.shields.io/badge/The%20Agent%20Swarm-8b5cf6?style=flat-square&logo=network&logoColor=white)
 
 A lightweight orchestration layer fans an idea out to **three specialists running in parallel**, then a fourth agent synthesizes everything into an executive decision — powered by Groq's `llama-3.3-70b-versatile` with **enforced structured JSON output**. Agents fail loudly rather than fabricate data, so a completed report is always trustworthy.
 
@@ -171,7 +176,7 @@ A lightweight orchestration layer fans an idea out to **three specialists runnin
 
 ---
 
-## Key Features
+## Key Features ![Key Features](https://img.shields.io/badge/Key%20Features-10b981?style=flat-square&logo=sparkles&logoColor=white)
 
 <table>
 <tr>
@@ -210,7 +215,7 @@ A lightweight orchestration layer fans an idea out to **three specialists runnin
 
 ---
 
-## Use Cases
+## Use Cases ![Use Cases](https://img.shields.io/badge/Use%20Cases-f59e0b?style=flat-square&logo=target&logoColor=white)
 
 <table>
 <tr>
@@ -223,7 +228,7 @@ A lightweight orchestration layer fans an idea out to **three specialists runnin
 
 ---
 
-## Tech Stack
+## Tech Stack ![Tech Stack](https://img.shields.io/badge/Tech%20Stack-0ea5e9?style=flat-square&logo=layers&logoColor=white)
 
 <table>
 <tr>
@@ -250,45 +255,44 @@ SQLite (dev) / PostgreSQL (prod)</span>
 
 ---
 
-## Repository Structure
+## Repository Structure ![Repository Structure](https://img.shields.io/badge/Repository%20Structure-94a3b8?style=flat-square&logo=folder&logoColor=white)
 
 ```text
-startuplaunch-ai/
-├── backend/                      # FastAPI async API + agent swarm
-│   ├── agents/
-│   │   ├── base.py               # BaseAgent: LLM client + strict JSON parsing
-│   │   ├── orchestrator.py       # Parallel swarm runner (asyncio.gather)
-│   │   ├── specialized.py        # Market, Competitor, Risk agents
-│   │   └── executive.py          # Go / No-Go / Pivot decision agent
-│   ├── api/
-│   │   ├── deps.py               # JWT auth dependency (get_current_user)
-│   │   └── routers/              # auth.py · projects.py · reports.py
-│   ├── core/
-│   │   ├── security.py           # JWT + bcrypt, fail-closed SECRET_KEY
-│   │   └── ratelimit.py          # Sliding-window limiter
-│   ├── services/workflow.py      # Background analysis workflow
-│   ├── alembic/                  # DB migrations
-│   ├── tests/                    # pytest suite (14 tests)
-│   ├── database.py               # Async engine + session factory
-│   ├── models.py                 # User / Project / Report ORM models
-│   ├── schemas.py                # Pydantic models
-│   └── main.py                   # FastAPI app · CORS · routers
-└── frontend/                     # Next.js 16 application
-    └── src/
-        ├── app/
-        │   ├── page.tsx              # Landing page
-        │   ├── (auth)/               # login · register
-        │   ├── dashboard/            # dashboard · new · project/[id]
-        │   ├── layout.tsx            # Root layout · metadata · viewport
-        │   ├── globals.css           # Design system + themes
-        │   └── icon.svg · favicon.ico · apple-icon.png · opengraph-image.png
-        ├── components/               # UI kit · theme toggle · confirm dialog
-        └── lib/api.ts                # API client + token management
+backend/                      # FastAPI async API + agent swarm
+├── agents/
+│   ├── base.py               # BaseAgent: LLM client + strict JSON parsing
+│   ├── orchestrator.py       # Parallel swarm runner (asyncio.gather)
+│   ├── specialized.py        # Market, Competitor, Risk agents
+│   └── executive.py          # Go / No-Go / Pivot decision agent
+├── api/
+│   ├── deps.py               # JWT auth dependency (get_current_user)
+│   └── routers/              # auth.py · projects.py · reports.py
+├── core/
+│   ├── security.py           # JWT + bcrypt, fail-closed SECRET_KEY
+│   └── ratelimit.py          # Sliding-window limiter
+├── services/workflow.py      # Background analysis workflow
+├── alembic/                  # DB migrations
+├── tests/                    # pytest suite (14 tests)
+├── database.py               # Async engine + session factory
+├── models.py                 # User / Project / Report ORM models
+├── schemas.py                # Pydantic models
+└── main.py                   # FastAPI app · CORS · routers
+frontend/                     # Next.js 16 application
+└── src/
+    ├── app/
+    │   ├── page.tsx              # Landing page
+    │   ├── (auth)/               # login · register
+    │   ├── dashboard/            # dashboard · new · project/[id]
+    │   ├── layout.tsx            # Root layout · metadata · viewport
+    │   ├── globals.css           # Design system + themes
+    │   └── icon.svg · favicon.ico · apple-icon.png · opengraph-image.png
+    ├── components/               # UI kit · theme toggle · confirm dialog
+    └── lib/api.ts                # API client + token management
 ```
 
 ---
 
-## Quick Start
+## Quick Start ![Quick Start](https://img.shields.io/badge/Quick%20Start-6366f1?style=flat-square&logo=terminal&logoColor=white)
 
 <table>
 <tr>
@@ -335,41 +339,41 @@ Open <http://localhost:3000>, register an account, and launch your first validat
 
 ---
 
-## Environment Variables
+## Environment Variables ![Environment Variables](https://img.shields.io/badge/Environment%20Variables-ef4444?style=flat-square&logo=gear&logoColor=white)
 
 #### Backend — `backend/.env`
 
-| Variable | Required | Default | Description |
-| --- | :-: | --- | --- |
-| `SECRET_KEY` | **Yes** | — | JWT signing secret. API refuses to start without it. |
-| `GROQ_API_KEY` | **Yes** | — | Groq LLM API key for the agent swarm. |
-| `DATABASE_URL` | No | `sqlite+aiosqlite:///./startuplaunch.db` | Async DB URL — use Postgres in production. |
-| `CORS_ORIGINS` | No | `http://localhost:3000` | Comma-separated allowed frontend origins. |
+| Variable       | Required | Default                                  | Description                                          |
+| -------------- | :------: | ---------------------------------------- | ---------------------------------------------------- |
+| `SECRET_KEY`   | **Yes**  | —                                        | JWT signing secret. API refuses to start without it. |
+| `GROQ_API_KEY` | **Yes**  | —                                        | Groq LLM API key for the agent swarm.                |
+| `DATABASE_URL` |    No    | `sqlite+aiosqlite:///./startuplaunch.db` | Async DB URL — use Postgres in production.           |
+| `CORS_ORIGINS` |    No    | `http://localhost:3000`                  | Comma-separated allowed frontend origins.            |
 
 #### Frontend — `frontend/.env.local`
 
-| Variable | Required | Description |
-| --- | :-: | --- |
-| `NEXT_PUBLIC_API_URL` | Yes (prod) | Backend base URL, e.g. `https://your-api.railway.app` |
+| Variable               |  Required  | Description                                               |
+| ---------------------- | :--------: | --------------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL`  | Yes (prod) | Backend base URL, e.g. `https://your-api.railway.app`     |
 | `NEXT_PUBLIC_SITE_URL` | Yes (prod) | Deployed frontend URL, e.g. `https://your-app.vercel.app` |
 
 ---
 
-## API Reference
+## API Reference ![API Reference](https://img.shields.io/badge/API%20Reference-3b82f6?style=flat-square&logo=code&logoColor=white)
 
 > All endpoints except `register`, `login` and `/` require an `Authorization: Bearer <token>` header.
 
-| Method | Endpoint | Description |
-| --- | --- | --- |
-| `GET` | `/` | API health / welcome |
-| `POST` | `/api/auth/register` | Create an account (email + password, min 8 chars) |
-| `POST` | `/api/auth/login` | OAuth2 form login → returns JWT `access_token` |
-| `POST` | `/api/projects/` | Create a project (title, description, target_audience?, industry?) |
-| `GET` | `/api/projects/` | List current user's projects (newest first) |
-| `GET` | `/api/projects/{id}` | Project detail including its report |
-| `POST` | `/api/projects/{id}/analyze` | Kick off the swarm in the background |
-| `DELETE` | `/api/projects/{id}` | Delete a project + report (cascade) |
-| `GET` | `/api/reports/{id}` | Fetch a report by id (owner-scoped) |
+| Method   | Endpoint                     | Description                                                        |
+| -------- | ---------------------------- | ------------------------------------------------------------------ |
+| `GET`    | `/`                          | API health / welcome                                               |
+| `POST`   | `/api/auth/register`         | Create an account (email + password, min 8 chars)                  |
+| `POST`   | `/api/auth/login`            | OAuth2 form login → returns JWT `access_token`                     |
+| `POST`   | `/api/projects/`             | Create a project (title, description, target_audience?, industry?) |
+| `GET`    | `/api/projects/`             | List current user's projects (newest first)                        |
+| `GET`    | `/api/projects/{id}`         | Project detail including its report                                |
+| `POST`   | `/api/projects/{id}/analyze` | Kick off the swarm in the background                               |
+| `DELETE` | `/api/projects/{id}`         | Delete a project + report (cascade)                                |
+| `GET`    | `/api/reports/{id}`          | Fetch a report by id (owner-scoped)                                |
 
 **End-to-end example (curl)**
 
@@ -426,7 +430,7 @@ curl -X POST http://localhost:8000/api/projects/1/analyze \
 
 ---
 
-## Data Model
+## Data Model ![Data Model](https://img.shields.io/badge/Data%20Model-84cc16?style=flat-square&logo=database&logoColor=white)
 
 ```text
 users ──1── N── projects ──1── 1── reports
@@ -442,7 +446,7 @@ users ──1── N── projects ──1── 1── reports
 
 ---
 
-## Testing & Quality
+## Testing & Quality ![Testing & Quality](https://img.shields.io/badge/Testing%20%26%20Quality-22c55e?style=flat-square&logo=flask&logoColor=white)
 
 <table>
 <tr>
@@ -474,7 +478,7 @@ npm run build         # production build
 
 ---
 
-## Deployment
+## Deployment ![Deployment](https://img.shields.io/badge/Deployment-0ea5e9?style=flat-square&logo=cloud&logoColor=white)
 
 <table>
 <tr>
@@ -504,33 +508,33 @@ FastAPI + SQLite cannot persist on serverless. Deploy the backend on a long-runn
 
 ---
 
-## Security
+## Security ![Security](https://img.shields.io/badge/Security-dc2626?style=flat-square&logo=shield&logoColor=white)
 
-| Area | Implementation |
-| --- | --- |
-| Secrets | Fail-closed — `SECRET_KEY` and `GROQ_API_KEY` never ship with defaults |
-| Passwords | bcrypt hashing, 72-byte enforcement, 8-char minimum policy |
-| Sessions | JWT (HS256) with 7-day expiry; server only trusts signed tokens |
-| Brute-force | Sliding-window rate limiting — 10/15 min per IP, 5/15 min per email |
-| Authorization | Owner-scoped queries — every project/report filtered by authenticated user |
-| Repo hygiene | `.env`, `venv/`, `*.db` and build artifacts gitignored; `.env.example` is the template |
+| Area          | Implementation                                                                         |
+| ------------- | -------------------------------------------------------------------------------------- |
+| Secrets       | Fail-closed — `SECRET_KEY` and `GROQ_API_KEY` never ship with defaults                 |
+| Passwords     | bcrypt hashing, 72-byte enforcement, 8-char minimum policy                             |
+| Sessions      | JWT (HS256) with 7-day expiry; server only trusts signed tokens                        |
+| Brute-force   | Sliding-window rate limiting — 10/15 min per IP, 5/15 min per email                    |
+| Authorization | Owner-scoped queries — every project/report filtered by authenticated user             |
+| Repo hygiene  | `.env`, `venv/`, `*.db` and build artifacts gitignored; `.env.example` is the template |
 
 ---
 
-## Roadmap
+## Roadmap ![Roadmap](https://img.shields.io/badge/Roadmap-f59e0b?style=flat-square&logo=map&logoColor=white)
 
-| Status | Item |
-| :-: | --- |
-| Next | Postgres + Docker Compose for one-command local setup |
-| Next | Report history / diffing across re-analyses |
+| Status  | Item                                                    |
+| :-----: | ------------------------------------------------------- |
+|  Next   | Postgres + Docker Compose for one-command local setup   |
+|  Next   | Report history / diffing across re-analyses             |
 | Planned | Industry-specific agent tuning and custom agent builder |
-| Planned | Email verification and password reset flows |
-| Planned | Stripe billing for a SaaS tier |
-| Later | Redis-backed rate limiting for multi-worker deploys |
+| Planned | Email verification and password reset flows             |
+| Planned | Stripe billing for a SaaS tier                          |
+|  Later  | Redis-backed rate limiting for multi-worker deploys     |
 
 ---
 
-## FAQ
+## FAQ ![FAQ](https://img.shields.io/badge/FAQ-64748b?style=flat-square&logo=book&logoColor=white)
 
 <details>
 <summary><b>How does the validation actually work?</b></summary>
@@ -569,7 +573,7 @@ SQLite works out of the box for local development (`DATABASE_URL` default). For 
 
 ---
 
-## Contributing
+## Contributing ![Contributing](https://img.shields.io/badge/Contributing-334155?style=flat-square&logo=gitpullrequest&logoColor=white)
 
 Contributions are welcome and appreciated. To contribute:
 
@@ -589,7 +593,7 @@ Report bugs and request features via [GitHub Issues](https://github.com/afaqulis
 
 ---
 
-## Author & License
+## Author & License ![Author & License](https://img.shields.io/badge/Author%20%26%20License-0f172a?style=flat-square&logo=github&logoColor=white)
 
 <div align="center">
 
@@ -601,7 +605,7 @@ Report bugs and request features via [GitHub Issues](https://github.com/afaqulis
 
 <br>
 
-**StartupLaunch AI** — *Powered by Autonomous Agent Swarms.*
+**StartupLaunch AI** — _Powered by Autonomous Agent Swarms._
 
 Released under the [MIT License](LICENSE).
 

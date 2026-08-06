@@ -2,10 +2,19 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import event
 import os
+import re
 
 # Create an SQLite database for initial development, we can switch to Postgres later if needed or configured.
 # We'll use async sqlite for simplicity initially unless PG is explicitly configured.
 SQLALCHEMY_DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///./startuplaunch.db")
+
+# SQLAlchemy maps a bare "postgresql://" URL to the sync psycopg2 driver, but
+# this app only uses async engines, so force the asyncpg driver instead.
+SQLALCHEMY_DATABASE_URL = re.sub(r"^postgresql://", "postgresql+asyncpg://", SQLALCHEMY_DATABASE_URL)
+# asyncpg (and its SQLAlchemy dialect) does not accept libpq-only URL
+# parameters such as sslmode or channel_binding. asyncpg defaults to
+# sslmode=prefer over TCP, so dropping them is safe even for SSL-required hosts.
+SQLALCHEMY_DATABASE_URL = re.sub(r"[?&](?:sslmode|channel_binding)=[^&]*", "", SQLALCHEMY_DATABASE_URL)
 
 _is_sqlite = "sqlite" in SQLALCHEMY_DATABASE_URL
 

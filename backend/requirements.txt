@@ -9,6 +9,7 @@ alembic
 openai
 python-multipart
 aiosqlite
+asyncpg
 python-dotenv
 
 # Testing
