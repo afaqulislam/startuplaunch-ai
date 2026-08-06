@@ -1,0 +1,337 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
+  --font-heading: var(--font-outfit), system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+}
+
+/* ── Theme Variables ──────────────────────────────────────────────────────── */
+/* next-themes with attribute="class" adds .dark / .light class to <html> */
+
+:root,
+.light {
+  --background: oklch(0.97 0.015 265);
+  --foreground: oklch(0.10 0.02 265);
+  --card: oklch(0.995 0.008 265);
+  --card-foreground: oklch(0.10 0.02 265);
+  --popover: oklch(0.99 0.01 265);
+  --popover-foreground: oklch(0.10 0.02 265);
+  --primary: oklch(0.52 0.26 270);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.92 0.04 265);
+  --secondary-foreground: oklch(0.10 0.02 265);
+  --muted: oklch(0.93 0.025 265);
+  --muted-foreground: oklch(0.42 0.05 265);
+  --accent: oklch(0.92 0.05 265);
+  --accent-foreground: oklch(0.10 0.02 265);
+  --destructive: oklch(0.52 0.22 25);
+  --border: oklch(0.78 0.04 265 / 55%);
+  --input: oklch(0.92 0.04 265 / 85%);
+  --ring: oklch(0.52 0.26 270);
+
+  /* Custom light-mode tokens */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(99, 102, 241, 0.12);
+  --glass-hover-bg: rgba(238, 240, 255, 0.88);
+  --glass-hover-border: rgba(99, 102, 241, 0.35);
+  --gradient-text-from: #4338ca;
+  --gradient-text-via: #6366f1;
+  --gradient-text-to: #0ea5e9;
+  --scrollbar-track: #f1f5f9;
+  --scrollbar-thumb: #c7d2fe;
+  --scrollbar-thumb-hover: #818cf8;
+}
+
+.dark {
+  --background: oklch(0.08 0.02 265);
+  --foreground: oklch(0.97 0.01 265);
+  --card: oklch(0.12 0.03 265);
+  --card-foreground: oklch(0.97 0.01 265);
+  --popover: oklch(0.12 0.03 265);
+  --popover-foreground: oklch(0.97 0.01 265);
+  --primary: oklch(0.66 0.24 270);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.18 0.04 265);
+  --secondary-foreground: oklch(0.97 0.01 265);
+  --muted: oklch(0.16 0.03 265);
+  --muted-foreground: oklch(0.64 0.04 265);
+  --accent: oklch(0.22 0.05 265);
+  --accent-foreground: oklch(0.97 0.01 265);
+  --destructive: oklch(0.60 0.25 25);
+  --border: oklch(0.22 0.04 265 / 60%);
+  --input: oklch(0.22 0.04 265 / 80%);
+  --ring: oklch(0.66 0.24 270);
+
+  /* Custom dark-mode tokens */
+  --glass-bg: rgba(12, 18, 40, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.07);
+  --glass-hover-bg: rgba(25, 36, 68, 0.88);
+  --glass-hover-border: rgba(99, 102, 241, 0.40);
+  --gradient-text-from: #a5b4fc;
+  --gradient-text-via: #818cf8;
+  --gradient-text-to: #38bdf8;
+  --scrollbar-track: #080B14;
+  --scrollbar-thumb: #1e293b;
+  --scrollbar-thumb-hover: #334155;
+}
+
+/* ── Base layer ──────────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+    font-feature-settings: "kern" 1, "liga" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Focus styles */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+/* ── Glass & Glow Utilities (theme-aware) ────────────────────────────────── */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-panel-hover {
+  transition: background 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-panel-hover:hover {
+  background: var(--glass-hover-bg);
+  border-color: var(--glass-hover-border);
+  box-shadow: 0 12px 40px -12px rgba(99, 102, 241, 0.28), 0 2px 8px -2px rgba(0,0,0,0.12);
+  transform: translateY(-3px);
+}
+
+/* ── Gradient top-line accent on card hover ─────────────────────────────── */
+.glow-card-indigo {
+  position: relative;
+  overflow: hidden;
+}
+.glow-card-indigo::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, #6366f1 40%, #06b6d4 70%, transparent);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  border-radius: 0.85rem 0.85rem 0 0;
+  z-index: 1;
+}
+.glow-card-indigo:hover::before {
+  opacity: 1;
+}
+
+/* ── Gradient Text — theme-aware ─────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(
+    135deg,
+    var(--gradient-text-from) 0%,
+    var(--gradient-text-via) 50%,
+    var(--gradient-text-to) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ── Glass & Glow Utilities (theme-aware) ────────────────────────────────── */
+.ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+  opacity: 0.5;
+  will-change: transform;
+}
+
+/* Tone down orbs in light mode */
+.light .ambient-orb {
+  opacity: 0.12;
+  filter: blur(120px);
+}
+
+/* ── Page Entry Animations ──────────────────────────────────────────────── */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+
+@keyframes slide-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Animation Utility Classes ─────────────────────────────────────────── */
+.animate-pulse-subtle {
+  animation: pulse-subtle 3.5s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up-fade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease both;
+}
+
+/* Stagger delays for list items */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.10s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.20s; }
+.stagger-5 { animation-delay: 0.25s; }
+
+/* ── Custom Scrollbar (theme-aware) ──────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* ── Selection ────────────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(99, 102, 241, 0.25);
+  color: var(--foreground);
+}
+
+/* ── Print Watermark (PDF export) ─────────────────────────────────────────── */
+.print-watermark {
+  display: none;
+}
+
+@media print {
+  .print-watermark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    color: rgba(67, 56, 202, 0.16);
+    transform: rotate(-30deg);
+    white-space: nowrap;
+  }
+
+  .print-watermark-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    border: 2px solid currentColor;
+    border-radius: 24px;
+    padding: 20px 56px;
+  }
+
+  .print-watermark-name {
+    font-size: 44px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    line-height: 1;
+  }
+
+  .print-watermark-role {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+  }
+
+  .print-footer {
+    margin-top: 48px;
+    padding-top: 12px;
+    border-top: 2px solid rgba(67, 56, 202, 0.15);
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(67, 56, 202, 0.6);
+    page-break-inside: avoid;
+  }
+}

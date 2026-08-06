@@ -1,0 +1,450 @@
+"use client"
+
+import { useState } from "react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { 
+  Bot, 
+  BrainCircuit, 
+  BarChart3, 
+  TrendingUp, 
+  ShieldAlert, 
+  Sparkles, 
+  ArrowRight, 
+  CheckCircle, 
+  ChevronRight,
+  Loader2,
+  Menu,
+  X
+} from "lucide-react"
+
+const GithubIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+    <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+  </svg>
+)
+
+const LinkedinIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+  </svg>
+)
+
+const XIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+    <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
+  </svg>
+)
+
+export default function LandingPage() {
+  const [activeTab, setActiveTab] = useState<"market" | "competitor" | "risk" | "executive">("executive")
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  return (
+    <div className="flex min-h-screen flex-col bg-background text-foreground relative overflow-x-clip">
+      {/* Ambient Background Orbs */}
+      <div className="ambient-orb top-[-150px] left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-indigo-600/40 dark:bg-indigo-600/30" />
+      <div className="ambient-orb top-[500px] right-[-150px] w-[600px] h-[600px] bg-cyan-500/30 dark:bg-cyan-500/20" />
+      <div className="ambient-orb top-[1000px] left-[-150px] w-[600px] h-[600px] bg-emerald-500/25 dark:bg-emerald-500/15" />
+
+      {/* Header */}
+      <header className="px-6 lg:px-12 h-20 flex items-center justify-between border-b border-border/60 backdrop-blur-2xl bg-background/70 sticky top-0 z-50 animate-fade-in">
+        <Link className="flex items-center gap-3 group" href="/">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 p-0.5 shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform duration-300">
+            <div className="w-full h-full bg-background rounded-[10px] flex items-center justify-center">
+              <BrainCircuit className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            </div>
+          </div>
+          <span className="font-heading font-extrabold text-xl tracking-tight text-foreground group-hover:opacity-80 transition-opacity">
+            StartupLaunch&nbsp;<span className="gradient-text">AI</span>
+          </span>
+        </Link>
+
+        <nav className="hidden md:flex gap-8 items-center text-sm font-medium text-muted-foreground">
+          <Link className="hover:text-foreground transition-colors duration-200" href="#features">Agent Swarm</Link>
+          <Link className="hover:text-foreground transition-colors duration-200" href="#demo">Live Demo</Link>
+          <Link className="hover:text-foreground transition-colors duration-200" href="#metrics">Stats</Link>
+        </nav>
+
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link href="/login" className="hidden sm:block">
+            <Button variant="ghost" className="text-sm font-medium text-foreground hover:bg-muted">
+              Log in
+            </Button>
+          </Link>
+          <Link href="/register" className="hidden sm:block">
+            <Button className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-lg shadow-indigo-500/40 dark:shadow-indigo-400/30 border-0 rounded-xl px-5 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+              Get Started <ArrowRight className="w-4 h-4 ml-1.5" />
+            </Button>
+          </Link>
+          <button
+            type="button"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            className="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-xl border border-border text-foreground hover:bg-muted transition-colors"
+          >
+            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Menu */}
+      <div
+        className={`md:hidden fixed inset-x-0 top-20 z-40 border-b border-border/60 backdrop-blur-2xl bg-background/95 shadow-xl shadow-black/5 transition-all duration-300 overflow-hidden ${
+          menuOpen ? "max-h-[420px] opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <nav className="px-6 py-6 flex flex-col gap-1" aria-label="Mobile navigation">
+          <Link
+            href="#features"
+            onClick={() => setMenuOpen(false)}
+            className="px-4 py-3 rounded-xl text-base font-medium text-foreground hover:bg-muted transition-colors"
+          >
+            Agent Swarm
+          </Link>
+          <Link
+            href="#demo"
+            onClick={() => setMenuOpen(false)}
+            className="px-4 py-3 rounded-xl text-base font-medium text-foreground hover:bg-muted transition-colors"
+          >
+            Live Demo
+          </Link>
+          <Link
+            href="#metrics"
+            onClick={() => setMenuOpen(false)}
+            className="px-4 py-3 rounded-xl text-base font-medium text-foreground hover:bg-muted transition-colors"
+          >
+            Stats
+          </Link>
+          <div className="mt-3 pt-4 border-t border-border flex flex-col gap-3">
+            <Link href="/login" onClick={() => setMenuOpen(false)}>
+              <Button variant="outline" className="w-full h-12 text-sm font-semibold">
+                Log in
+              </Button>
+            </Link>
+            <Link href="/register" onClick={() => setMenuOpen(false)}>
+              <Button className="w-full h-12 text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white border-0 rounded-xl">
+                Get Started <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Button>
+            </Link>
+          </div>
+        </nav>
+      </div>
+
+      <main className="flex-1 z-10">
+        {/* Hero Section */}
+        <section className="w-full py-24 lg:py-32 px-4 relative">
+          <div className="max-w-6xl mx-auto flex flex-col items-center text-center space-y-8">
+            
+            {/* Status Badge */}
+            <div className="animate-slide-up stagger-1 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/25 text-xs font-semibold tracking-wider backdrop-blur-md">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 [animation-duration:1500ms] motion-reduce:animate-none" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              <span className="text-indigo-600 dark:text-indigo-300 uppercase">Multi-Agent Swarm v2.0 Live</span>
+              <Sparkles className="w-3.5 h-3.5 text-cyan-500 dark:text-cyan-400" />
+            </div>
+
+            {/* Main Headline */}
+            <h1 className="animate-slide-up stagger-2 text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold tracking-tight max-w-5xl leading-[1.05] text-foreground">
+              Validate ideas with{" "}
+              <span className="gradient-text">Autonomous</span>{" "}
+              <br className="hidden sm:block" />
+              <span className="gradient-text">AI Swarms</span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="animate-slide-up stagger-3 max-w-2xl text-lg sm:text-xl text-foreground/70 dark:text-foreground/80 leading-relaxed font-normal">
+              Stop building in the dark. Dispatch four specialized AI agents to deliver real-time market research, competitor matrices, risk simulations, and executive verdicts — in under 20 seconds.
+            </p>
+
+            {/* Hero CTAs */}
+            <div className="animate-slide-up stagger-4 flex flex-col sm:flex-row gap-4 pt-2 w-full sm:w-auto">
+              <Link href="/register">
+                <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl shadow-2xl shadow-indigo-500/40 dark:shadow-indigo-400/25 border-0 transition-all duration-300 hover:scale-105 hover:shadow-indigo-400/40 group">
+                  <Sparkles className="w-5 h-5 mr-2 group-hover:animate-pulse-subtle" />
+                  Start Free Validation
+                </Button>
+              </Link>
+              <Link href="#demo">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-base font-semibold bg-indigo-100 dark:bg-indigo-900/60 border-indigo-300 dark:border-indigo-500/60 text-indigo-700 dark:text-indigo-200 rounded-2xl transition-all duration-300 hover:scale-105 hover:bg-indigo-200 dark:hover:bg-indigo-800/60 hover:shadow-lg hover:shadow-indigo-500/15">
+                  Explore Live Demo
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* Trust Indicators */}
+            <div className="animate-slide-up stagger-5 flex flex-wrap justify-center items-center gap-x-8 gap-y-3 pt-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
+                <span>TAM / SAM / SOM in seconds</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-cyan-500 dark:text-cyan-400 shrink-0" />
+                <span>Live competitor moat analysis</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-indigo-500 dark:text-indigo-400 shrink-0" />
+                <span>Executive Go / No-Go verdict</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Live Demo Mockup Card */}
+          <div id="demo" className="max-w-5xl mx-auto mt-20 lg:mt-28 animate-slide-up stagger-5">
+            <div className="glass-panel rounded-3xl p-1.5 shadow-2xl shadow-indigo-500/10 border border-indigo-500/15 relative">
+              {/* Glow lines */}
+              <div className="absolute -top-px left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-indigo-500/60 to-transparent" />
+              
+              <div className="bg-card rounded-[20px] p-5 sm:p-6 border border-border/50">
+                {/* Window chrome */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-5 border-b border-border gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-red-400/80" />
+                      <div className="w-3 h-3 rounded-full bg-amber-400/80" />
+                      <div className="w-3 h-3 rounded-full bg-emerald-400/80" />
+                    </div>
+                    <span className="text-xs font-mono text-muted-foreground">agent-orchestrator.live ●</span>
+                    <span className="text-xs text-emerald-500 dark:text-emerald-400 font-semibold animate-pulse-subtle">RUNNING</span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 bg-muted/80 p-1.5 rounded-xl border border-border w-full sm:w-auto overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    {(["executive", "market", "competitor", "risk"] as const).map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-200 capitalize whitespace-nowrap shrink-0 ${
+                          activeTab === tab 
+                            ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25" 
+                            : "text-muted-foreground hover:text-foreground hover:bg-background/60"
+                        }`}
+                      >
+                        {tab === "executive" ? "Orchestrator" : `${tab.charAt(0).toUpperCase() + tab.slice(1)} Agent`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Tab Content */}
+                <div className="pt-6 min-h-[200px]">
+                  {activeTab === "executive" && (
+                    <div className="space-y-5 animate-fade-in">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-11 h-11 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                            <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                          </div>
+                          <div>
+                            <p className="text-xs uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-bold mb-0.5">Executive Verdict</p>
+                            <h4 className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-300">GO — Confidence: 91%</h4>
+                          </div>
+                        </div>
+                        <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 px-3 py-1 text-xs font-semibold">Strong Market Fit</Badge>
+                      </div>
+                      <p className="text-muted-foreground text-sm leading-relaxed">
+                        &quot;The proposed AI-Powered Developer Code Review platform addresses a high-friction pain point in mid-to-enterprise engineering teams. Market demand is accelerating 42% YoY with weak incumbent specialization.&quot;
+                      </p>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-500" />
+                        <span>4 agents completed · 18.3s total execution</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === "market" && (
+                    <div className="space-y-5 animate-fade-in">
+                      <p className="text-xs uppercase tracking-widest text-indigo-600 dark:text-indigo-400 font-bold">Market Size & Growth Projections</p>
+                      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+                        {[
+                          { label: "TAM", value: "$28.4B", color: "text-indigo-600 dark:text-indigo-400" },
+                          { label: "SAM", value: "$4.1B", color: "text-cyan-600 dark:text-cyan-400" },
+                          { label: "SOM", value: "$380M", color: "text-emerald-600 dark:text-emerald-400" },
+                        ].map((item) => (
+                          <div key={item.label} className="bg-muted/80 p-3 sm:p-4 rounded-xl border border-border text-center space-y-1 min-w-0">
+                            <span className="text-xs text-muted-foreground block font-medium truncate">{item.label}</span>
+                            <span className={`${item.color} font-extrabold text-lg sm:text-xl block`}>{item.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground">CAGR 42% YoY · Developer tooling vertical · 2024–2028</p>
+                    </div>
+                  )}
+
+                  {activeTab === "competitor" && (
+                    <div className="space-y-4 animate-fade-in">
+                      <p className="text-xs uppercase tracking-widest text-cyan-600 dark:text-cyan-400 font-bold">Competitive Landscape & Moat</p>
+                      <div className="space-y-2">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 bg-muted/60 p-3.5 rounded-xl border border-border text-sm">
+                          <span className="font-semibold text-foreground">Direct Incumbents</span>
+                          <span className="text-muted-foreground text-xs">SonarQube, Snyk, CodeClimate</span>
+                        </div>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 bg-emerald-500/10 p-3.5 rounded-xl border border-emerald-500/20 text-sm">
+                          <span className="font-semibold text-emerald-600 dark:text-emerald-400">Your Unfair Moat</span>
+                          <span className="text-emerald-600 dark:text-emerald-300 text-xs font-medium">Auto PR-Fix + SOC2 Compliance Agent</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === "risk" && (
+                    <div className="space-y-3 animate-fade-in">
+                      <p className="text-xs uppercase tracking-widest text-red-500 dark:text-red-400 font-bold">Risk Matrix & Mitigations</p>
+                      <div className="space-y-2">
+                        <div className="p-3.5 bg-red-500/10 rounded-xl border border-red-500/20 text-red-700 dark:text-red-300 text-sm">
+                          <strong>Technical Risk:</strong> High LLM token cost per PR scan.
+                        </div>
+                        <div className="p-3.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-sm">
+                          <strong>Mitigation:</strong> AST diff caching layer before full LLM inference. Estimated 60% cost reduction.
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Stats Bar */}
+        <section id="metrics" className="py-16 border-y border-border/60 bg-card/50 backdrop-blur-md">
+          <div className="max-w-6xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            {[
+              { value: "14,200+", label: "Ideas Analyzed", color: "text-foreground" },
+              { value: "$4.8M", label: "R&D Dollars Saved", color: "text-indigo-600 dark:text-indigo-400" },
+              { value: "<20s", label: "Avg Swarm Speed", color: "text-cyan-600 dark:text-cyan-400" },
+              { value: "96%", label: "Precision Rate", color: "text-emerald-600 dark:text-emerald-400" },
+            ].map((stat) => (
+              <div key={stat.label} className="space-y-2">
+                <p className={`text-4xl lg:text-5xl font-extrabold ${stat.color}`}>{stat.value}</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Agent Architecture Section */}
+        <section id="features" className="py-24 px-4 max-w-6xl mx-auto">
+          <div className="text-center space-y-4 mb-16">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">The Advisory Board</p>
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-foreground">Four agents. One verdict.</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed">
+              Specialized agents work in parallel, stress-testing your idea from every dimension simultaneously.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[
+              {
+                icon: BarChart3,
+                title: "Market Research Agent",
+                desc: "Evaluates TAM/SAM/SOM market sizes, growth drivers, target personas, and adoption trends.",
+                border: "border-indigo-500/20",
+                iconBg: "bg-indigo-500/10 border-indigo-500/25",
+                iconColor: "text-indigo-600 dark:text-indigo-400",
+                output: "Market Size & CAGR",
+                outputColor: "text-indigo-600 dark:text-indigo-300",
+              },
+              {
+                icon: TrendingUp,
+                title: "Competitor Intel Agent",
+                desc: "Maps direct & indirect competitors, pricing models, feature matrix, and uncovers your unique moat.",
+                border: "border-cyan-500/20",
+                iconBg: "bg-cyan-500/10 border-cyan-500/25",
+                iconColor: "text-cyan-600 dark:text-cyan-400",
+                output: "Competitive Moat",
+                outputColor: "text-cyan-600 dark:text-cyan-300",
+              },
+              {
+                icon: ShieldAlert,
+                title: "Risk Evaluation Agent",
+                desc: "Diagnoses technical feasibility hurdles, regulatory obstacles, and execution pitfalls with mitigations.",
+                border: "border-amber-500/20",
+                iconBg: "bg-amber-500/10 border-amber-500/25",
+                iconColor: "text-amber-600 dark:text-amber-400",
+                output: "Risk Mitigations",
+                outputColor: "text-amber-600 dark:text-amber-300",
+              },
+              {
+                icon: Bot,
+                title: "Executive Orchestrator",
+                desc: "Synthesizes all findings into a scored executive verdict: Go, Pivot, or No-Go — with key takeaways.",
+                border: "border-emerald-500/20",
+                iconBg: "bg-emerald-500/10 border-emerald-500/25",
+                iconColor: "text-emerald-600 dark:text-emerald-400",
+                output: "Final Recommendation",
+                outputColor: "text-emerald-600 dark:text-emerald-300",
+              },
+            ].map(({ icon: Icon, title, desc, border, iconBg, iconColor, output, outputColor }) => (
+              <div key={title} className={`glass-panel glass-panel-hover glow-card-indigo rounded-2xl p-6 flex flex-col justify-between space-y-5 border ${border}`}>
+                <div className="space-y-4">
+                  <div className={`w-12 h-12 rounded-xl ${iconBg} border flex items-center justify-center ${iconColor}`}>
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-foreground leading-snug">{title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{desc}</p>
+                </div>
+                <div className={`pt-4 border-t border-border text-xs font-mono font-semibold ${outputColor}`}>
+                  OUTPUT: {output}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Final CTA Banner */}
+        <section className="py-20 px-4 max-w-5xl mx-auto mb-16">
+          <div className="p-10 sm:p-14 rounded-3xl bg-indigo-600 text-center space-y-6 relative overflow-hidden shadow-xl shadow-indigo-500/30">
+            <div className="ambient-orb -top-20 left-1/2 -translate-x-1/2 w-80 h-80 bg-indigo-500/40 dark:bg-indigo-500/25" />
+            <div className="relative z-10 space-y-2">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-200">Ready to validate?</p>
+              <h2 className="text-3xl sm:text-5xl font-extrabold text-white">
+                Your next big idea deserves{" "}
+                <span className="text-white underline decoration-indigo-300/50 underline-offset-4">clarity</span>.
+              </h2>
+            </div>
+            <p className="text-indigo-100/90 text-base sm:text-lg max-w-xl mx-auto relative z-10">
+              Join thousands of founders and investors validating startup ideas with AI precision before investing time and capital.
+            </p>
+            <div className="pt-4 relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link href="/register">
+                <Button size="lg" className="h-14 px-10 text-base font-bold bg-white text-indigo-700 hover:bg-indigo-50 rounded-xl shadow-lg shadow-black/20 border-0 transition-all duration-300 hover:scale-105">
+                  Launch Your First Validation <ChevronRight className="w-5 h-5 ml-1" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="px-6 lg:px-12 py-8 border-t border-border/60 bg-card/50 backdrop-blur-md text-xs text-muted-foreground">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center">
+              <BrainCircuit className="w-3 h-3 text-white" />
+            </div>
+            <span>© {new Date().getFullYear()} StartupLaunch AI — Powered by Autonomous Agent Swarms.</span>
+          </div>
+          <div className="flex gap-6">
+            <Link href="https://github.com/afaqulislam" target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="flex items-center gap-1.5 hover:text-foreground transition-colors">
+              <GithubIcon className="w-4 h-4" /> GitHub
+            </Link>
+            <Link href="https://www.linkedin.com/in/afaqulislam" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="flex items-center gap-1.5 hover:text-foreground transition-colors">
+              <LinkedinIcon className="w-4 h-4" /> LinkedIn
+            </Link>
+            <Link href="https://x.com/afaqulislam708" target="_blank" rel="noopener noreferrer" aria-label="Twitter X" className="flex items-center gap-1.5 hover:text-foreground transition-colors">
+              <XIcon className="w-4 h-4" /> X
+            </Link>
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
+}
