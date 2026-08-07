@@ -49,12 +49,12 @@ async def _recover_stuck_runs() -> None:
 async def _ensure_token_version_column() -> None:
     """Dev-only schema compatibility.
 
-    create_all() never adds columns to an *existing* database file, so a SQLite
-    DB created before the token_version column would crash every authenticated
-    request. Add the column if it's missing. For Postgres, use alembic.
+    create_all() never adds columns to an *existing* database, so a SQLite or
+    Postgres DB created before the token_version column would crash every
+    authenticated request. Add the column if it's missing. The existence check
+    keeps this idempotent; the guarded ALTER works on both dialects. Clean
+    installs and production schema changes should still go through alembic.
     """
-    if not _is_sqlite:
-        return
     try:
         async with engine.begin() as conn:
             columns = await conn.run_sync(
@@ -66,7 +66,7 @@ async def _ensure_token_version_column() -> None:
                 await conn.execute(
                     text("ALTER TABLE users ADD COLUMN token_version INTEGER NOT NULL DEFAULT 0")
                 )
-                logger.info("Added missing 'token_version' column to SQLite users table")
+                logger.info("Added missing 'token_version' column to users table")
     except Exception:
         logger.exception("Failed to apply token_version schema compatibility")
 

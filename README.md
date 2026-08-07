@@ -11,7 +11,7 @@ Validate your startup idea in minutes with a swarm of specialized AI agents that
 <br>
 
 <div style="background:#0b1020;border-radius:14px;padding:12px 24px;color:#a5b4fc;font-size:14px">
-<b>Next.js 16</b> &nbsp;·&nbsp; <b>React 19</b> &nbsp;·&nbsp; <b>TypeScript 5</b> &nbsp;·&nbsp; <b>Tailwind CSS v4</b> &nbsp;·&nbsp; <b>FastAPI</b> &nbsp;·&nbsp; <b>Groq Llama 3.3</b> &nbsp;·&nbsp; <b>PostgreSQL</b>
+<b>Next.js 16</b> &nbsp;·&nbsp; <b>React 19</b> &nbsp;·&nbsp; <b>TypeScript 5</b> &nbsp;·&nbsp; <b>Tailwind CSS v4</b> &nbsp;·&nbsp; <b>FastAPI</b> &nbsp;·&nbsp; <b>Groq Llama 3.3</b> &nbsp;·&nbsp; <b>PostgreSQL / SQLite</b>
 </div>
 
 <br>
@@ -25,7 +25,7 @@ Validate your startup idea in minutes with a swarm of specialized AI agents that
 <table align="center">
 <tr>
   <td align="center" width="25%" style="background:#eef2ff;border-radius:14px;padding:20px"><div style="font-size:26px;font-weight:800;color:#4338ca">14,200+</div><div style="color:#6b7280;font-size:13px">Ideas Analyzed</div></td>
-  <td align="center" width="25%" style="background:#ecfeff;border-radius:14px;padding:20px"><div style="font-size:26px;font-weight:800;color:#0e7490">&lt;20s</div><div style="color:#6b7280;font-size:13px">Avg Swarm Speed</div></td>
+  <td align="center" width="25%" style="background:#ecfeff;border-radius:14px;padding:20px"><div style="font-size:26px;font-weight:800;color:#0e7490">&lt;20s</div><div style="color:#6b7280;font-size:13px">Typical Swarm Speed</div></td>
   <td align="center" width="25%" style="background:#ecfdf5;border-radius:14px;padding:20px"><div style="font-size:26px;font-weight:800;color:#047857">96%</div><div style="color:#6b7280;font-size:13px">Precision Rate</div></td>
   <td align="center" width="25%" style="background:#fef3c7;border-radius:14px;padding:20px"><div style="font-size:26px;font-weight:800;color:#b45309">4 Agents</div><div style="color:#6b7280;font-size:13px">One Verdict</div></td>
 </tr>
@@ -37,41 +37,54 @@ Validate your startup idea in minutes with a swarm of specialized AI agents that
 
 ## Table of Contents ![Table of Contents](https://img.shields.io/badge/Table%20of%20Contents-64748b?style=flat-square&logo=list&logoColor=white)
 
-- [StartupLaunch AI](#startuplaunch-ai)
-    - [Autonomous AI Agent Swarms — Instant Startup Idea Validation](#autonomous-ai-agent-swarms--instant-startup-idea-validation)
-  - [Table of Contents ](#table-of-contents-)
-  - [Overview ](#overview-)
-  - [How It Works ](#how-it-works-)
-  - [The Agent Swarm ](#the-agent-swarm-)
-  - [Key Features ](#key-features-)
-  - [Use Cases ](#use-cases-)
-  - [Tech Stack ](#tech-stack-)
-  - [Repository Structure ](#repository-structure-)
-  - [Quick Start ](#quick-start-)
-      - [Backend — FastAPI](#backend--fastapi)
-      - [Frontend — Next.js](#frontend--nextjs)
-  - [Environment Variables ](#environment-variables-)
-      - [Backend — `backend/.env`](#backend--backendenv)
-      - [Frontend — `frontend/.env.local`](#frontend--frontendenvlocal)
-  - [API Reference ](#api-reference-)
-  - [Data Model ](#data-model-)
-  - [Testing \& Quality ](#testing--quality-)
-      - [Backend — pytest](#backend--pytest)
-      - [Frontend — quality gates](#frontend--quality-gates)
-  - [Deployment ](#deployment-)
-      - [Frontend → Vercel](#frontend--vercel)
-      - [Backend → Railway / Render / Fly.io](#backend--railway--render--flyio)
-  - [Security ](#security-)
-  - [Roadmap ](#roadmap-)
-  - [FAQ ](#faq-)
-  - [Contributing ](#contributing-)
-  - [Author \& License ](#author--license-)
+- [What Is StartupLaunch AI?](#what-is-startuplaunch-ai)
+- [Why It Matters](#why-it-matters)
+- [How It Works](#how-it-works)
+- [The Agent Swarm](#the-agent-swarm)
+- [Key Features](#key-features)
+- [Use Cases](#use-cases)
+- [Tech Stack](#tech-stack)
+- [Repository Structure](#repository-structure)
+- [Quick Start](#quick-start)
+    - [Prerequisites](#prerequisites)
+    - [Backend — FastAPI](#backend--fastapi)
+    - [Frontend — Next.js](#frontend--nextjs)
+    - [First Run Walkthrough](#first-run-walkthrough)
+- [Environment Variables](#environment-variables)
+    - [Backend — `backend/.env`](#backend--backendenv)
+    - [Frontend — `frontend/.env.local`](#frontend--frontendenvlocal)
+- [API Reference](#api-reference)
+    - [Endpoints](#endpoints)
+    - [Query Parameters & Rate Limits](#query-parameters--rate-limits)
+    - [End-to-End Example](#end-to-end-example-curl)
+    - [Report Schema](#report-schema)
+- [Data Model](#data-model)
+- [Testing & Quality](#testing--quality)
+    - [Backend — pytest (27 tests)](#backend--pytest-27-tests)
+    - [Frontend — quality gates](#frontend--quality-gates)
+- [Performance & Reliability](#performance--reliability)
+- [Deployment](#deployment)
+    - [Frontend → Vercel](#frontend--vercel)
+    - [Backend → Railway / Render / Fly.io](#backend--railway--render--flyio)
+    - [Database Migrations](#database-migrations)
+- [Security](#security)
+- [Roadmap](#roadmap)
+- [FAQ](#faq)
+- [Contributing](#contributing)
+- [Author & License](#author--license)
 
 ---
 
-## Overview ![Overview](https://img.shields.io/badge/Overview-6366f1?style=flat-square&logo=eye&logoColor=white)
+## What Is StartupLaunch AI? ![What Is StartupLaunch AI](https://img.shields.io/badge/What%20Is%20StartupLaunch%20AI-6366f1?style=flat-square&logo=rocket&logoColor=white)
 
 Most founders validate ideas with gut feel, biased friends, or expensive consultants. StartupLaunch AI replaces that with a **repeatable, autonomous research pipeline** that runs in seconds and returns the kind of decision-grade intelligence you would expect from a top-tier venture research team.
+
+It is a full-stack web application (Next.js + FastAPI monorepo) that:
+
+- Accepts a startup idea (title, description, target audience, industry).
+- Dispatches **three specialized AI agents in parallel** — Market Research, Competitor Analysis, Risk Assessment — powered by Groq's `llama-3.3-70b-versatile`.
+- Synthesizes their findings with a fourth **Executive Decision agent** into a **Go / No-Go / Pivot** recommendation.
+- Persists everything as a structured, tabbed report with **PDF export**, all behind secure authentication.
 
 | Traditional validation     | StartupLaunch AI                                |
 | -------------------------- | ----------------------------------------------- |
@@ -89,6 +102,18 @@ Most founders validate ideas with gut feel, biased friends, or expensive consult
 <td align="center" width="20%" style="background:#f8fafc;border-radius:10px;padding:12px"><b style="color:#047857">PDF Reports</b><br><span style="color:#6b7280;font-size:13px">Branded &amp; print-ready</span></td>
 <td align="center" width="20%" style="background:#f8fafc;border-radius:10px;padding:12px"><b style="color:#b45309">JWT Auth</b><br><span style="color:#6b7280;font-size:13px">bcrypt + rate limiting</span></td>
 <td align="center" width="20%" style="background:#f8fafc;border-radius:10px;padding:12px"><b style="color:#dc2626">Crash-Safe</b><br><span style="color:#6b7280;font-size:13px">Auto-recovery workflow</span></td>
+</tr>
+</table>
+
+---
+
+## Why It Matters ![Why It Matters](https://img.shields.io/badge/Why%20It%20Matters-f59e0b?style=flat-square&logo=zap&logoColor=white)
+
+<table>
+<tr>
+<td width="33%" align="center" style="background:#eef2ff;border-radius:12px;padding:16px"><b style="color:#4338ca">Speed</b><br><span style="color:#6b7280;font-size:13px">Most runs finish in under 20 seconds — a full research cycle, not a slide deck.</span></td>
+<td width="33%" align="center" style="background:#ecfeff;border-radius:12px;padding:16px"><b style="color:#0e7490">Consistency</b><br><span style="color:#6b7280;font-size:13px">Every idea gets the same rigorous, structured analysis — no mood swings, no bias.</span></td>
+<td width="33%" align="center" style="background:#ecfdf5;border-radius:12px;padding:16px"><b style="color:#047857">Objectivity</b><br><span style="color:#6b7280;font-size:13px">Agents fail loudly rather than fabricate, so a completed report is trustworthy.</span></td>
 </tr>
 </table>
 
@@ -121,11 +146,18 @@ Most founders validate ideas with gut feel, biased friends, or expensive consult
 </tr>
 </table>
 
+The full request lifecycle:
+
+1. The user creates a project and hits **Analyze**.
+2. The backend **atomically claims** the run (single `UPDATE`), setting status to `analyzing` — two concurrent requests can never double-dispatch the swarm.
+3. A **background task** runs the orchestrator; the dashboard polls status every 4 seconds while a run is in flight.
+4. On success the project moves to `completed`; on failure it moves to `failed` with the run reset so the user can retry.
+
 ---
 
 ## The Agent Swarm ![The Agent Swarm](https://img.shields.io/badge/The%20Agent%20Swarm-8b5cf6?style=flat-square&logo=network&logoColor=white)
 
-A lightweight orchestration layer fans an idea out to **three specialists running in parallel**, then a fourth agent synthesizes everything into an executive decision — powered by Groq's `llama-3.3-70b-versatile` with **enforced structured JSON output**. Agents fail loudly rather than fabricate data, so a completed report is always trustworthy.
+A lightweight orchestration layer fans an idea out to **three specialists running in parallel**, then a fourth agent synthesizes everything into an executive decision — powered by Groq's `llama-3.3-70b-versatile` with **enforced structured JSON output**.
 
 ```text
                           ┌─────────────────────┐
@@ -134,7 +166,7 @@ A lightweight orchestration layer fans an idea out to **three specialists runnin
                                      │
                           ┌──────────▼──────────┐
                           │  SWARM ORCHESTRATOR │
-                          │  (120s hard timeout)│
+                          │  (300s hard timeout)│
                           └──────────┬──────────┘
                                      │
         ┌─────────────────┬──────────┴───────────┬─────────────────┐
@@ -165,14 +197,23 @@ A lightweight orchestration layer fans an idea out to **three specialists runnin
       └─────────────────────────┘
 ```
 
+**Agent roles**
+
 <table>
 <tr>
 <td width="25%" align="center" style="background:#eef2ff;border-radius:12px;padding:14px"><b style="color:#4338ca">Market Research</b><br><span style="color:#6b7280;font-size:13px">Target market, TAM / SAM / SOM, trends</span></td>
-<td width="25%" align="center" style="background:#ecfeff;border-radius:12px;padding:14px"><b style="color:#0e7490">Competitor Analysis</b><br><span style="color:#6b7280;font-size:13px">Direct &amp; indirect rivals, unfair moat</span></td>
-<td width="25%" align="center" style="background:#fef3c7;border-radius:12px;padding:14px"><b style="color:#b45309">Risk Assessment</b><br><span style="color:#6b7280;font-size:13px">Technical, market, execution + mitigations</span></td>
-<td width="25%" align="center" style="background:#ecfdf5;border-radius:12px;padding:14px"><b style="color:#047857">Executive Verdict</b><br><span style="color:#6b7280;font-size:13px">Go / No-Go / Pivot + summary</span></td>
+<td width="25%" align="center" style="background:#ecfeff;border-radius:12px;padding:14px"><b style="color:#0e7490">Competitor Analysis</b><br><span style="color:#6b7280;font-size:13px">Direct &amp; indirect rivals, unfair moat / differentiators</span></td>
+<td width="25%" align="center" style="background:#fef3c7;border-radius:12px;padding:14px"><b style="color:#b45309">Risk Assessment</b><br><span style="color:#6b7280;font-size:13px">Technical, market, execution risks + mitigations</span></td>
+<td width="25%" align="center" style="background:#ecfdf5;border-radius:12px;padding:14px"><b style="color:#047857">Executive Verdict</b><br><span style="color:#6b7280;font-size:13px">Go / No-Go / Pivot + executive summary</span></td>
 </tr>
 </table>
+
+**Resilience by design**
+
+- **Fail loudly, never fabricate.** Agents reject empty responses, malformed JSON, and non-object output. A report is only marked `completed` if the data is real.
+- **Partial runs are preserved.** If one specialist fails, the successful sections are still saved and the report is flagged `_partial` — the UI shows an amber banner and offers a re-run, so one transient failure never wipes out good work.
+- **Structured output everywhere.** The orchestrator requires a `dict` from the executive agent; anything else becomes a clean, recorded failure instead of a crash deep in report-building code.
+- **Bounded spend.** Each swarm run is capped at a hard **300-second timeout**, and per-user dispatch is rate-limited.
 
 ---
 
@@ -189,25 +230,33 @@ A lightweight orchestration layer fans an idea out to **three specialists runnin
 </tr>
 <tr>
 <td width="50%" style="border-left:4px solid #10b981;padding:12px 16px;background:#fafefa;border-radius:8px">
-<b>Decision-ready dashboard</b><br>Track every project with live status: pending → analyzing → completed / failed.
+<b>Decision-ready dashboard</b><br>Live status (pending → analyzing → completed / failed) with 4-second polling and live metrics.
 </td>
 <td width="50%" style="border-left:4px solid #f59e0b;padding:12px 16px;background:#fffbf5;border-radius:8px">
-<b>PDF export</b><br>Polished, branded, print-ready reports via react-to-print.
+<b>Server-side search &amp; filter</b><br>Search by title, description or industry with 400ms debounce; filter by status; pagination that composes with both.
 </td>
 </tr>
 <tr>
 <td width="50%" style="border-left:4px solid #8b5cf6;padding:12px 16px;background:#fcfaff;border-radius:8px">
-<b>Secure authentication</b><br>bcrypt hashing, JWT sessions, built-in sliding-window rate limiting.
+<b>PDF export</b><br>Polished, branded, print-ready reports via react-to-print.
 </td>
 <td width="50%" style="border-left:4px solid #ef4444;padding:12px 16px;background:#fffafa;border-radius:8px">
-<b>Crash-safe workflow</b><br>Stuck runs auto-recover after 10 min; swarm runs cap at 120s.
+<b>Crash-safe workflow</b><br>Stuck runs auto-recover after 10 minutes; each swarm run caps at 300 seconds.
 </td>
 </tr>
 <tr>
 <td width="50%" style="border-left:4px solid #64748b;padding:12px 16px;background:#f8fafc;border-radius:8px">
-<b>Dark / light mode</b><br>Theme-aware UI with glassmorphism and ambient gradients.
+<b>Secure authentication</b><br>bcrypt hashing, JWT sessions, and **token revocation** — changing your password kills every outstanding session at once.
 </td>
 <td width="50%" style="border-left:4px solid #0ea5e9;padding:12px 16px;background:#f7fcff;border-radius:8px">
+<b>Hardened by default</b><br>CSP + security headers on both tiers, fail-closed secrets, owner-scoped queries, sliding-window rate limiting.
+</td>
+</tr>
+<tr>
+<td width="50%" style="border-left:4px solid #0d9488;padding:12px 16px;background:#f0fdfa;border-radius:8px">
+<b>Dark / light mode</b><br>Theme-aware UI with glassmorphism and ambient gradients.
+</td>
+<td width="50%" style="border-left:4px solid #b45309;padding:12px 16px;background:#fffbeb;border-radius:8px">
 <b>SEO + social ready</b><br>Open Graph, Twitter cards, and a custom BrainCircuit brand asset suite.
 </td>
 </tr>
@@ -234,7 +283,7 @@ A lightweight orchestration layer fans an idea out to **three specialists runnin
 <tr>
 <td width="33%" align="center" style="background:#f8fafc;border-radius:12px;padding:16px">
 <b>Frontend</b><br><span style="color:#6b7280;font-size:13px">
-Next.js 16 · React 19 · TypeScript 5<br>
+Next.js 16 (App Router) · React 19 · TypeScript 5<br>
 Tailwind CSS v4 · Base UI + shadcn-style kit<br>
 lucide-react · next-themes · react-to-print</span>
 </td>
@@ -248,6 +297,7 @@ asyncpg · python-jose (JWT) · bcrypt</span>
 <b>AI Runtime</b><br><span style="color:#6b7280;font-size:13px">
 Groq · llama-3.3-70b-versatile<br>
 AsyncOpenAI SDK · enforced JSON output<br>
+Redis-backed rate limiting (optional)<br>
 SQLite (dev) · PostgreSQL / Neon (prod)</span>
 </td>
 </tr>
@@ -258,49 +308,60 @@ SQLite (dev) · PostgreSQL / Neon (prod)</span>
 ## Repository Structure ![Repository Structure](https://img.shields.io/badge/Repository%20Structure-94a3b8?style=flat-square&logo=folder&logoColor=white)
 
 ```text
-backend/                      # FastAPI async API + agent swarm
-├── agents/
-│   ├── base.py               # BaseAgent: LLM client + strict JSON parsing
-│   ├── orchestrator.py       # Parallel swarm runner (asyncio.gather)
-│   ├── specialized.py        # Market, Competitor, Risk agents
-│   └── executive.py          # Go / No-Go / Pivot decision agent
-├── api/
-│   ├── deps.py               # JWT auth dependency (get_current_user)
-│   └── routers/              # auth.py · projects.py · reports.py
-├── core/
-│   ├── security.py           # JWT + bcrypt, fail-closed SECRET_KEY
-│   └── ratelimit.py          # Sliding-window limiter
-├── services/workflow.py      # Background analysis workflow
-├── alembic/                  # DB migrations
-├── tests/                    # pytest suite (14 tests)
-├── database.py               # Async engine + session factory
-├── models.py                 # User / Project / Report ORM models
-├── schemas.py                # Pydantic models
-├── requirements.txt          # Python dependencies
-├── .env.example              # Env var template
-└── main.py                   # FastAPI app · CORS · routers
-frontend/                     # Next.js 16 application
-└── src/
-    ├── app/
-    │   ├── page.tsx              # Landing page
-    │   ├── (auth)/               # login · register
-    │   ├── dashboard/            # dashboard · new · project/[id]
-    │   ├── layout.tsx            # Root layout · metadata · viewport
-    │   ├── globals.css           # Design system + themes
-    │   └── icon.svg · favicon.ico · apple-icon.png · opengraph-image.png
-    ├── components/               # UI kit · theme toggle · confirm dialog
-    └── lib/api.ts                # API client + token management
+startuplaunch-ai/
+├── backend/                       # FastAPI async API + agent swarm
+│   ├── agents/
+│   │   ├── base.py                # BaseAgent: Groq client, retries, strict JSON extraction
+│   │   ├── orchestrator.py        # Parallel swarm runner (gather + 300s timeout + partial runs)
+│   │   ├── specialized.py         # Market · Competitor · Risk agents
+│   │   └── executive.py           # Go / No-Go / Pivot decision agent
+│   ├── api/
+│   │   ├── deps.py                # JWT auth dependency + token-version revocation check
+│   │   └── routers/               # auth.py · projects.py · reports.py
+│   ├── core/
+│   │   ├── security.py            # JWT + bcrypt, fail-closed SECRET_KEY
+│   │   └── ratelimit.py           # Sliding-window limiter (in-memory or Redis)
+│   ├── services/workflow.py       # Background analysis workflow (report persistence)
+│   ├── alembic/                   # DB migrations (initial · analysis_started_at · token_version)
+│   ├── tests/                     # 27 pytest tests (auth · projects · reports · orchestrator)
+│   ├── database.py                # Async engine + session factory + SQLite FK pragma
+│   ├── models.py                  # User / Project / Report ORM models
+│   ├── schemas.py                 # Pydantic models + input validation constraints
+│   ├── main.py                    # FastAPI app · CORS · security headers · lifespan
+│   ├── requirements.txt           # Python dependencies
+│   └── .env.example               # Env var template
+│
+└── frontend/                      # Next.js 16 application
+    ├── src/
+    │   ├── app/
+    │   │   ├── page.tsx               # Landing page
+    │   │   ├── (auth)/                # login · register
+    │   │   ├── dashboard/             # dashboard · new · project/[id]
+    │   │   ├── layout.tsx             # Root layout · metadata · viewport
+    │   │   ├── globals.css            # Design system + themes
+    │   │   └── icon.svg · favicon.ico · apple-icon.png · opengraph-image.png
+    │   ├── components/                # UI kit · theme toggle · confirm dialog
+    │   └── lib/
+    │       ├── api.ts                 # Typed API client + token management
+    │       └── utils.ts               # cn() helper (clsx + tailwind-merge)
+    ├── next.config.ts                 # CSP + security headers
+    └── package.json
 ```
 
 ---
 
 ## Quick Start ![Quick Start](https://img.shields.io/badge/Quick%20Start-6366f1?style=flat-square&logo=terminal&logoColor=white)
 
-<table>
-<tr>
-<td width="50%" valign="top" style="background:#0b1020;border-radius:14px;padding:18px">
+### Prerequisites
 
-#### Backend — FastAPI
+| Tool             | Version     | Why                                        |
+| ---------------- | ----------- | ------------------------------------------ |
+| Python           | 3.10+       | Runs the FastAPI backend                   |
+| Node.js          | 18.18+ (20 recommended) | Runs the Next.js frontend    |
+| npm              | 9+          | Frontend package manager                   |
+| Groq API key     | —           | Powers the agent swarm (free tier available) |
+
+### Backend — FastAPI
 
 ```bash
 cd backend
@@ -316,14 +377,12 @@ cp .env.example .env
 uvicorn main:app --reload --port 8000
 ```
 
-Interactive API docs: <http://localhost:8000/docs>
+- Interactive API docs (Swagger UI): <http://localhost:8000/docs>
+- Tables are created automatically on startup — no manual migration step for dev.
+- A bare `postgresql://` URL is auto-upgraded to the `asyncpg` driver, and libpq-only params (`sslmode`, `channel_binding`) are stripped, so Neon/RDS URLs work as-is.
+- For existing databases (SQLite or Postgres) created before `token_version` existed, a guarded startup compatibility step adds the column automatically.
 
-Tables are created automatically on startup — no manual migration step needed. A bare `postgresql://` URL is auto-upgraded to the `asyncpg` driver, so Neon/RDS URLs work as-is.
-
-</td>
-<td width="50%" valign="top" style="background:#0b1020;border-radius:14px;padding:18px">
-
-#### Frontend — Next.js
+### Frontend — Next.js
 
 ```bash
 cd frontend
@@ -337,26 +396,34 @@ npm run dev
 
 Open <http://localhost:3000>, register an account, and launch your first validation.
 
-</td>
-</tr>
-</table>
+### First Run Walkthrough
+
+1. Register an account (email + password, **8–72 characters**).
+2. Click **New Startup Idea**, fill in title and description (target audience and industry are optional), and save.
+3. Click **Analyze Idea** — the card turns cyan ("Swarm Running...").
+4. Within seconds-to-a-minute the project completes and **View Report** opens the tabbed report:
+   - **Overview** — the executive verdict, summary, and key takeaways.
+   - **Market / Competitors / Risk** tabs with structured findings.
+   - **Download PDF** — print-ready export of the full report.
+5. Re-analyze any time with the **Re-analyze** button; delete with the trash icon (confirmed via dialog).
 
 ---
 
 ## Environment Variables ![Environment Variables](https://img.shields.io/badge/Environment%20Variables-ef4444?style=flat-square&logo=gear&logoColor=white)
 
-#### Backend — `backend/.env`
+### Backend — `backend/.env`
 
 | Variable       | Required | Default                                  | Description                                          |
 | -------------- | :------: | ---------------------------------------- | ---------------------------------------------------- |
 | `SECRET_KEY`   | **Yes**  | —                                        | JWT signing secret. API refuses to start without it. |
 | `GROQ_API_KEY` | **Yes**  | —                                        | Groq LLM API key for the agent swarm.                |
-| `DATABASE_URL` |    No    | `sqlite+aiosqlite:///./startuplaunch.db` | Async DB URL — use Postgres/Neon in production. |
+| `DATABASE_URL` |    No    | `sqlite+aiosqlite:///./startuplaunch.db` | Async DB URL — use Postgres/Neon in production.      |
+| `CORS_ORIGINS` |    No    | `http://localhost:3000`                  | Comma-separated allowed frontend origins.            |
+| `REDIS_URL`    |    No    | —                                        | Enables Redis-backed rate limiting (multi-worker).   |
 
 > **Note:** a bare `postgresql://` URL is automatically upgraded to the `asyncpg` driver and libpq-only query params (`sslmode`, `channel_binding`) are stripped, so Neon/RDS connection strings work as-is.
-| `CORS_ORIGINS` |    No    | `http://localhost:3000`                  | Comma-separated allowed frontend origins.            |
 
-#### Frontend — `frontend/.env.local`
+### Frontend — `frontend/.env.local`
 
 | Variable               |  Required  | Description                                               |
 | ---------------------- | :--------: | --------------------------------------------------------- |
@@ -367,21 +434,43 @@ Open <http://localhost:3000>, register an account, and launch your first validat
 
 ## API Reference ![API Reference](https://img.shields.io/badge/API%20Reference-3b82f6?style=flat-square&logo=code&logoColor=white)
 
+### Endpoints
+
 > All endpoints except `register`, `login` and `/` require an `Authorization: Bearer <token>` header.
 
 | Method   | Endpoint                     | Description                                                        |
 | -------- | ---------------------------- | ------------------------------------------------------------------ |
 | `GET`    | `/`                          | API health / welcome                                               |
-| `POST`   | `/api/auth/register`         | Create an account (email + password, min 8 chars)                  |
+| `POST`   | `/api/auth/register`         | Create an account (email + password, 8–72 chars)                   |
 | `POST`   | `/api/auth/login`            | OAuth2 form login → returns JWT `access_token`                     |
+| `POST`   | `/api/auth/change-password`  | Change password; **revokes all outstanding sessions**              |
 | `POST`   | `/api/projects/`             | Create a project (title, description, target_audience?, industry?) |
-| `GET`    | `/api/projects/`             | List current user's projects (newest first)                        |
+| `GET`    | `/api/projects/`             | List the current user's projects — search & filter server-side     |
 | `GET`    | `/api/projects/{id}`         | Project detail including its report                                |
-| `POST`   | `/api/projects/{id}/analyze` | Kick off the swarm in the background                               |
+| `POST`   | `/api/projects/{id}/analyze` | Kick off the swarm in the background (rate-limited per user)       |
 | `DELETE` | `/api/projects/{id}`         | Delete a project + report (cascade)                                |
-| `GET`    | `/api/reports/{id}`          | Fetch a report by id (owner-scoped)                                |
+| `GET`    | `/api/reports/{id}`          | Fetch a report by id (owner-scoped, 403 otherwise)                 |
 
-**End-to-end example (curl)**
+### Query Parameters & Rate Limits
+
+**`GET /api/projects/`**
+
+| Param    | Type   | Default | Constraints              | Description                             |
+| -------- | ------ | ------- | ------------------------ | --------------------------------------- |
+| `skip`   | int    | `0`     | `>= 0`                   | Offset for pagination                   |
+| `limit`  | int    | `100`   | `1–100`                  | Page size                               |
+| `search` | string | —       | `<= 200` chars           | Case-insensitive match on title, description, industry |
+| `status` | string | —       | any value                | Exact status filter (pending/analyzing/completed/failed) |
+
+**Auth rate limits** (sliding window, per 15 minutes)
+
+| Action             | Per IP  | Per email | Per user |
+| ------------------ | :-----: | :-------: | :------: |
+| Register           | 10      | 5         | —        |
+| Login              | 10      | 5         | —        |
+| Analyze (swarm)    | —       | —         | 5        |
+
+### End-to-End Example (curl)
 
 ```bash
 # 1. Register
@@ -404,9 +493,23 @@ curl -X POST http://localhost:8000/api/projects/ \
 # 4. Launch the swarm
 curl -X POST http://localhost:8000/api/projects/1/analyze \
   -H "Authorization: Bearer <TOKEN>"
+
+# 5. List with server-side search + status filter
+curl -G http://localhost:8000/api/projects/ \
+  -H "Authorization: Bearer <TOKEN>" \
+  --data-urlencode "search=code review" \
+  --data-urlencode "status=completed"
+
+# 6. Change password (revokes all existing tokens)
+curl -X POST http://localhost:8000/api/auth/change-password \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"current_password":"supersecret","new_password":"evenbettersecret"}'
 ```
 
-**Agent report shape — `Report.content`**
+### Report Schema
+
+The persisted report lives in `Report.content` (JSON). A successful run contains:
 
 ```json
 {
@@ -434,6 +537,16 @@ curl -X POST http://localhost:8000/api/projects/1/analyze \
 }
 ```
 
+When one or more agents fail mid-run, the saved content is marked **partial** so consumers can tell a degraded report from a complete one:
+
+```json
+{
+  "market_analysis": { "..." : "..." },
+  "_partial": true,
+  "_agent_errors": { "risk_analysis": "Agent timed out" }
+}
+```
+
 ---
 
 ## Data Model ![Data Model](https://img.shields.io/badge/Data%20Model-84cc16?style=flat-square&logo=database&logoColor=white)
@@ -443,33 +556,38 @@ users ──1── N── projects ──1── 1── reports
  id                id                 id
  email (unique)    title              project_id (FK, CASCADE)
  hashed_password   description        content (JSON)
- is_active         target_audience    executive_summary
- created_at        industry           pdf_url
-                   status             created_at
+ token_version     target_audience    executive_summary
+ is_active         industry           pdf_url
+ created_at        status             created_at
                    analysis_started_at
                    user_id (FK, CASCADE)
 ```
+
+- `users.email` is stored lowercased; lookups are case-insensitive.
+- `users.token_version` is incremented on password change — every JWT embeds the version at issue time, so older tokens are instantly rejected.
+- `projects.status` cycles `pending → analyzing → completed | failed`.
+- Deleting a project cascades to its report (ORM and DB-level `ON DELETE CASCADE`).
 
 ---
 
 ## Testing & Quality ![Testing & Quality](https://img.shields.io/badge/Testing%20%26%20Quality-22c55e?style=flat-square&logo=flask&logoColor=white)
 
-<table>
-<tr>
-<td width="50%" style="background:#f0fdf4;border-radius:14px;padding:16px">
-
-#### Backend — pytest
+### Backend — pytest (27 tests)
 
 ```bash
 cd backend
 venv\Scripts\python.exe -m pytest tests -q
-# 14 passed — auth · projects · reports
+# 27 passed — auth (10) · projects (10) · reports (3) · orchestrator (4)
 ```
 
-</td>
-<td width="50%" style="background:#eff6ff;border-radius:14px;padding:16px">
+Covered behaviors include:
 
-#### Frontend — quality gates
+- **Auth**: registration, duplicate emails, case-insensitive matching, weak/invalid input rejection, wrong/unknown/inactive-user logins, and **token revocation on password change**.
+- **Projects**: full lifecycle, atomic run claiming, stale-run recovery sweeps, pagination validation, cross-user access denial, **server-side search & status filtering**, **partial-report persistence**, and **per-user analyze rate limiting**.
+- **Reports**: ownership enforcement (403), 404 handling, and auth requirement.
+- **Orchestrator**: partial runs keep successful sections, all-fail raises, executive failure yields partial output, non-dict output treated as failure.
+
+### Frontend — quality gates
 
 ```bash
 cd frontend
@@ -478,9 +596,21 @@ npm run lint          # ESLint
 npm run build         # production build
 ```
 
-</td>
-</tr>
-</table>
+All three gates are green in CI-style local runs (zero TypeScript errors, zero lint errors, successful production build).
+
+---
+
+## Performance & Reliability ![Performance & Reliability](https://img.shields.io/badge/Performance%20%26%20Reliability-14b8a6?style=flat-square&logo=activity&logoColor=white)
+
+| Concern              | Behavior                                                                   |
+| -------------------- | -------------------------------------------------------------------------- |
+| Swarm timeout        | Hard **300-second cap** per run so a hung LLM call never blocks forever.   |
+| Stuck-run recovery   | Runs stuck in `analyzing` are swept to `failed` after **10 minutes** at startup and before re-analysis — safe to re-dispatch. |
+| Double-dispatch      | Runs are claimed with a single atomic `UPDATE`; concurrent requests return 400. |
+| Polling              | Dashboard polls every **4 seconds** while any run is `analyzing`.          |
+| Transient failures   | Each agent retries up to 2 times with exponential backoff + jitter.        |
+| Partial results      | A failing specialist never discards the other agents' completed work.      |
+| LLM spend control    | Swarm dispatch is rate-limited to 5 runs / 15 minutes per user.            |
 
 ---
 
@@ -496,6 +626,7 @@ npm run build         # production build
 2. Set **Root Directory** to `frontend`.
 3. Add env vars: `NEXT_PUBLIC_API_URL` → backend URL, `NEXT_PUBLIC_SITE_URL` → Vercel URL.
 4. Deploy — the landing page is fully static; dashboard and auth need the backend URL.
+5. The `next.config.ts` security headers (CSP, `nosniff`, `X-Frame-Options`, `Referrer-Policy`) are applied automatically.
 
 </td>
 <td width="50%" valign="top" style="border-top:5px solid #009688;border-radius:10px;padding:16px;background:#f7fbfb">
@@ -506,38 +637,57 @@ FastAPI + SQLite cannot persist on serverless. Deploy the backend on a long-runn
 
 1. Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`.
 2. Set env vars: `SECRET_KEY`, `GROQ_API_KEY`, `CORS_ORIGINS` (your Vercel URL), `DATABASE_URL` (managed **PostgreSQL** — works with Neon/RDS).
-3. Tables are auto-created on startup (`Base.metadata.create_all`); no manual migration step required.
+3. For multi-worker deploys, set `REDIS_URL` to share rate-limit state across processes.
+4. Tables are auto-created on startup (`Base.metadata.create_all`).
 
 </td>
 </tr>
 </table>
 
+### Database Migrations
+
+Dev mode auto-creates tables (`create_all`) plus a guarded startup compatibility step that adds the `token_version` column to existing SQLite or Postgres databases. For production schema changes, use the checked-in Alembic migrations:
+
+```bash
+cd backend
+alembic upgrade head
+```
+
+Three migrations are provided: the initial schema, `analysis_started_at`, and `token_version` (revision chain `c6fe7409bd81 → a1b2c3d4e5f6 → b1b2c3d4e5f7`).
+
 ---
 
 ## Security ![Security](https://img.shields.io/badge/Security-dc2626?style=flat-square&logo=shield&logoColor=white)
 
-| Area          | Implementation                                                                         |
-| ------------- | -------------------------------------------------------------------------------------- |
-| Secrets       | Fail-closed — `SECRET_KEY` and `GROQ_API_KEY` never ship with defaults                 |
-| Passwords     | bcrypt hashing, 72-byte enforcement, 8-char minimum policy                             |
-| Sessions      | JWT (HS256) with 7-day expiry; server only trusts signed tokens                        |
-| Brute-force   | Sliding-window rate limiting — 10/15 min per IP, 5/15 min per email                    |
-| Authorization | Owner-scoped queries — every project/report filtered by authenticated user             |
-| Repo hygiene  | `.env`, `venv/`, `*.db` and build artifacts gitignored; `.env.example` is the template |
+| Area             | Implementation                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------- |
+| Secrets          | Fail-closed — `SECRET_KEY` and `GROQ_API_KEY` never ship with defaults. The API refuses to start without `SECRET_KEY`. |
+| Passwords        | bcrypt hashing with 72-byte enforcement; 8-char minimum, 72-char maximum policy.       |
+| Sessions         | JWT (HS256) with 7-day expiry; server only trusts signed tokens.                       |
+| Revocation       | `token_version` claim — a password change bumps the version and instantly invalidates every previously-issued token. |
+| Brute-force      | Sliding-window rate limiting — 10/15 min per IP, 5/15 min per email (register & login), 5/15 min per user (analyze). |
+| Authorization    | Owner-scoped queries — every project/report filtered by the authenticated user; cross-user access returns 403/404. |
+| Headers (API)    | `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`. |
+| Headers (web)    | Strict CSP (`default-src 'self'`, no `object-src`, `frame-ancestors 'none'`, scoped `connect-src`) + `nosniff` + `X-Frame-Options` + `Referrer-Policy`. |
+| Input validation | Pydantic constraints — title ≤120, description ≤4000, search ≤200, blank/whitespace rejected, payloads trimmed. |
+| Repo hygiene      | `.env`, `venv/`, `*.db`, build artifacts and logs gitignored; `.env.example` is the committed template. |
 
 ---
 
 ## Roadmap ![Roadmap](https://img.shields.io/badge/Roadmap-f59e0b?style=flat-square&logo=map&logoColor=white)
 
-| Status  | Item                                                    |
-| :-----: | ------------------------------------------------------- |
-|   ✔     | Production Postgres support (asyncpg + Neon-ready)      |
-|  Next   | Docker Compose one-command local setup                   |
-|  Next   | Report history / diffing across re-analyses             |
-| Planned | Industry-specific agent tuning and custom agent builder |
-| Planned | Email verification and password reset flows             |
-| Planned | Stripe billing for a SaaS tier                          |
-|  Later  | Redis-backed rate limiting for multi-worker deploys     |
+| Status   | Item                                                    |
+| :------: | ------------------------------------------------------- |
+|   Done   | Production Postgres support (asyncpg + Neon-ready)      |
+|   Done   | Redis-backed rate limiting for multi-worker deploys     |
+|   Done   | Server-side search & status filtering on the dashboard  |
+|   Done   | Token revocation via password change                    |
+|   Done   | CSP + security headers on both tiers                    |
+|   Next    | Docker Compose one-command local setup                   |
+|   Next    | Report history / diffing across re-analyses             |
+|  Planned | Industry-specific agent tuning and custom agent builder |
+|  Planned | Email verification and password reset flows             |
+|  Planned | Stripe billing for a SaaS tier                          |
 
 ---
 
@@ -545,17 +695,22 @@ FastAPI + SQLite cannot persist on serverless. Deploy the backend on a long-runn
 
 <details>
 <summary><b>How does the validation actually work?</b></summary>
-You describe your idea, and the orchestrator dispatches three specialist agents — Market Research, Competitor Analysis, Risk Assessment — in parallel. An Executive Decision agent then synthesizes their findings into a Go / No-Go / Pivot verdict with an executive summary and key takeaways.
+You describe your idea, and the orchestrator dispatches three specialist agents — Market Research, Competitor Analysis, Risk Assessment — in parallel. An Executive Decision agent then synthesizes their findings into a Go / No-Go / Pivot verdict with an executive summary and key takeaways. Everything is stored as structured JSON and rendered as a tabbed report.
 </details>
 
 <details>
 <summary><b>Which LLM powers the agents?</b></summary>
-The swarm runs on Groq's `llama-3.3-70b-versatile`, accessed through the OpenAI SDK with enforced JSON output. The model is configurable in `backend/agents/base.py`.
+The swarm runs on Groq's `llama-3.3-70b-versatile`, accessed through the OpenAI SDK with enforced JSON output. The model and instructions are configurable in `backend/agents/base.py` and `backend/agents/specialized.py`.
 </details>
 
 <details>
 <summary><b>How long does an analysis take?</b></summary>
-Most runs complete in under 20 seconds. Every swarm run is capped at a hard 120-second timeout so a hung LLM call can never block forever.
+Most runs complete in under 20 seconds. Every swarm run is capped at a hard 300-second (5-minute) timeout so a hung LLM call can never block forever.
+</details>
+
+<details>
+<summary><b>What happens if one agent fails mid-run?</b></summary>
+The successful sections are still saved and the report is flagged as partial (`_partial: true` with a list of which agents errored). The UI shows an amber banner and lets you re-run. Only a complete swarm failure marks the project `failed`.
 </details>
 
 <details>
@@ -564,8 +719,13 @@ Yes. Re-dispatching replaces the previous report. If a run is left stuck in "ana
 </details>
 
 <details>
+<summary><b>How does password change affect my sessions?</b></summary>
+Every JWT embeds a token version. Changing your password bumps that version, so all tokens issued before the change are rejected immediately — you'll need to log in again on every device.
+</details>
+
+<details>
 <summary><b>Is my data private?</b></summary>
-Yes. Authentication is required, and every project and report query is scoped to the authenticated user. Reports are only visible to their owner.
+Yes. Authentication is required, and every project and report query is scoped to the authenticated user. Reports are only visible to their owner (cross-user access returns 403).
 </details>
 
 <details>
@@ -575,7 +735,12 @@ Not for a full deployment. The backend is an async FastAPI service with file-bas
 
 <details>
 <summary><b>SQLite or PostgreSQL?</b></summary>
-SQLite works out of the box for local development (`DATABASE_URL` default). For production, set `DATABASE_URL` to a Postgres URL (e.g. Neon) — tables are auto-created on startup.
+SQLite works out of the box for local development (`DATABASE_URL` default). For production, set `DATABASE_URL` to a Postgres URL (e.g. Neon) — tables are auto-created on startup and Alembic migrations are provided.
+</details>
+
+<details>
+<summary><b>Why Redis?</b></summary>
+Rate limiting uses an in-process sliding window by default — perfect for single-worker dev. When `REDIS_URL` is set, it switches to a Redis sorted-set backend so limits stay consistent across multiple workers in production.
 </details>
 
 ---
@@ -592,7 +757,7 @@ Contributions are welcome and appreciated. To contribute:
 Please keep the quality gates green before submitting:
 
 ```bash
-cd backend && python -m pytest tests -q     # all tests pass
+cd backend && python -m pytest tests -q     # all 27 tests pass
 cd frontend && npx tsc --noEmit && npm run lint
 ```
 
