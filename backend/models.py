@@ -10,6 +10,10 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
+    # Bumped on password change to invalidate every previously-issued JWT.
+    # Tokens embed this number; get_current_user rejects tokens whose version
+    # is older than the user's current one.
+    token_version = Column(Integer, default=0, nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

@@ -19,6 +19,11 @@ venv/
 *.egg-info/
 .mypy_cache/
 .ruff_cache/
+coverage/
+.coverage
+
+# Logs
+*.log
 
 # Backend runtime data + secrets
 backend/*.db

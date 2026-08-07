@@ -17,12 +17,12 @@ def test_report_ownership_enforced(client, direct_db):
         "risk_analysis": {"technical_risks": [], "market_risks": [], "execution_risks": [], "mitigation_strategies": []},
         "executive_decision": {"executive_summary": "Good", "recommendation": "Go", "key_takeaways": []},
     }
-    direct_db["insert_report"](project_id, content)
+    report_id = direct_db["insert_report"](project_id, content)
 
-    res = client.get("/api/reports/1", headers=auth_headers(token_b))
+    res = client.get(f"/api/reports/{report_id}", headers=auth_headers(token_b))
     assert res.status_code == 403
 
-    res = client.get("/api/reports/1", headers=auth_headers(token_a))
+    res = client.get(f"/api/reports/{report_id}", headers=auth_headers(token_a))
     assert res.status_code == 200
     assert res.json()["content"]["executive_decision"]["recommendation"] == "Go"
 

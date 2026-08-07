@@ -67,6 +67,36 @@ function SectionLabel({ label }: { label: string }) {
   return <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-3">{label}</p>
 }
 
+function fmtList(items?: string[]) {
+  return items && items.length > 0 ? items.join(", ") : "N/A"
+}
+
+// LLMs are inconsistent about casing ("GO", "go", "No-Go", "nogo", "Pivot").
+// Normalize so the verdict banner and its colors always match.
+function normalizeRecommendation(value: string | null | undefined): string | null {
+  if (!value) return null
+  const v = value.trim().toLowerCase()
+  if (v === "go") return "Go"
+  if (v === "no-go" || v === "no go" || v === "nogo") return "No-Go"
+  if (v === "pivot") return "Pivot"
+  return value.trim()
+}
+
+// key_takeaways can arrive as an array, or (from a sloppy LLM) as a bulleted
+// string or object. Coerce anything reasonable into a string array so the
+// renderer never iterates a non-array.
+function normalizeTakeaways(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.filter((x): x is string => typeof x === "string")
+  }
+  if (typeof value === "string") {
+    return value.split(/\n|•|,/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+  }
+  return []
+}
+
 function MarketTab({ data }: { data?: MarketAnalysis | null }) {
   if (!data) return <p className="text-muted-foreground">No market data available.</p>
   return (
@@ -175,6 +205,7 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
   const [fetchError, setFetchError] = useState("")
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [actionError, setActionError] = useState("")
 
   const contentRef = useRef<HTMLDivElement>(null)
   const reactToPrintFn = useReactToPrint({ contentRef })
@@ -230,10 +261,12 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
 
     try {
       await apiFetch(`/api/projects/${id}/analyze`, { method: "POST" })
+      setActionError("")
       fetchProject()
     } catch (err) {
       // Revert the optimistic update so the UI reflects the real status
       setProject(prev => prev ? { ...prev, status: previousStatus } : prev)
+      setActionError(err instanceof Error ? err.message : "Couldn't start analysis. Check that the backend is running.")
       console.error("Failed to start analysis:", err)
     }
   }
@@ -250,6 +283,7 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
       await apiFetch(`/api/projects/${id}`, { method: "DELETE" })
       router.push("/dashboard")
     } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Couldn't delete the project.")
       console.error("Failed to delete project:", err)
       setDeleteOpen(false)
     }
@@ -308,18 +342,19 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
   const riskData = reportContent.risk_analysis || legacy?.risk_assessment || reportContent.risk_assessment
 
   const executiveData = reportContent.executive_decision || reportContent.executive_summary
-  const recommendation =
+  const recommendation = normalizeRecommendation(
     typeof executiveData === "object" && executiveData
       ? executiveData.recommendation
-      : reportContent.recommendation || null
+      : reportContent.recommendation ?? null
+  )
   const executiveSummary =
     (typeof executiveData === "object" && executiveData
       ? executiveData.executive_summary
       : String(executiveData || "")) || project.report?.executive_summary || ""
-  const keyTakeaways: string[] =
-    (typeof executiveData === "object" && executiveData ? executiveData.key_takeaways : null) ||
-    reportContent.key_takeaways ||
-    []
+  const keyTakeaways = normalizeTakeaways(
+    (typeof executiveData === "object" && executiveData ? executiveData.key_takeaways : undefined) ??
+      reportContent.key_takeaways
+  )
 
   const recColor = recommendation === "Go" ? "text-emerald-600 dark:text-emerald-400" : recommendation === "No-Go" ? "text-red-600 dark:text-red-400" : "text-amber-600 dark:text-amber-400"
   const recBg = recommendation === "Go" ? "border-emerald-500/30 bg-emerald-500/10" : recommendation === "No-Go" ? "border-red-500/30 bg-red-500/10" : "border-amber-500/30 bg-amber-500/10"
@@ -373,6 +408,20 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
             </Badge>
           </div>
         </div>
+
+        {/* Action Error Banner */}
+        {actionError && (
+          <div className="glass-panel p-4 rounded-2xl border border-red-500/30 bg-red-500/5 flex items-start justify-between gap-3">
+            <p className="text-sm text-red-600 dark:text-red-400">{actionError}</p>
+            <button
+              onClick={() => setActionError("")}
+              aria-label="Dismiss error"
+              className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors shrink-0"
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         {/* Project Header Info */}
         <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-indigo-500/20 space-y-4">
@@ -480,9 +529,47 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
           </div>
         )}
 
+        {/* Completed but the report is missing (e.g. legacy data) */}
+        {isCompleted && !hasReport && (
+          <div className="glass-panel p-10 rounded-3xl border border-amber-500/30 text-center space-y-4">
+            <AlertTriangle className="w-14 h-14 text-amber-500 dark:text-amber-400 mx-auto" />
+            <h3 className="text-2xl font-bold text-foreground">Report Missing</h3>
+            <p className="text-muted-foreground text-sm max-w-md mx-auto">
+              This project is marked complete but has no validation report. Re-dispatch the swarm to regenerate it.
+            </p>
+            <Button onClick={handleAnalyze} className="bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white rounded-xl gap-2 font-semibold">
+              <Sparkles className="w-4 h-4" /> Re-run Analysis
+            </Button>
+          </div>
+        )}
+
         {/* Completed Report View */}
         {isCompleted && hasReport && (
           <div className="space-y-8 animate-in fade-in duration-500">
+
+            {/* Partial Report Warning */}
+            {reportContent._partial && (
+              <div className="glass-panel p-5 rounded-3xl border border-amber-500/30 bg-amber-500/5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-6 h-6 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-foreground">Partial Report — Some Agents Failed</h4>
+                    <p className="text-sm text-muted-foreground mt-0.5">
+                      The sections below that could not be generated are shown as
+                      &quot;No data available&quot;. You can re-dispatch the swarm to retry.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleAnalyze}
+                  className="sm:ml-auto border-amber-500/40 text-amber-600 dark:text-amber-300 hover:bg-amber-500/10 rounded-xl gap-2 text-xs font-semibold shrink-0"
+                >
+                  <RotateCcw className="w-4 h-4" /> Re-run Analysis
+                </Button>
+              </div>
+            )}
 
             {/* Executive Verdict Banner */}
             {recommendation && (
@@ -593,21 +680,21 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
             </div>
             <div className="mb-6">
               <h2 className="text-xl font-bold mb-2 border-b pb-1">Market Research</h2>
-              <p><strong>Target Market:</strong> {marketData?.target_market}</p>
-              <p className="mt-1"><strong>Market Size:</strong> TAM: {marketData?.market_size?.tam} | SAM: {marketData?.market_size?.sam} | SOM: {marketData?.market_size?.som}</p>
-              <p className="mt-1"><strong>Trends:</strong> {marketData?.trends?.join(", ")}</p>
+              <p><strong>Target Market:</strong> {marketData?.target_market || "N/A"}</p>
+              <p className="mt-1"><strong>Market Size:</strong> TAM: {marketData?.market_size?.tam || "N/A"} | SAM: {marketData?.market_size?.sam || "N/A"} | SOM: {marketData?.market_size?.som || "N/A"}</p>
+              <p className="mt-1"><strong>Trends:</strong> {fmtList(marketData?.trends)}</p>
             </div>
             <div className="mb-6">
               <h2 className="text-xl font-bold mb-2 border-b pb-1">Competitor Analysis</h2>
-              <p><strong>Direct:</strong> {competitorData?.direct_competitors?.join(", ")}</p>
-              <p><strong>Indirect:</strong> {competitorData?.indirect_competitors?.join(", ")}</p>
-              <p><strong>Differentiators:</strong> {competitorData?.differentiators?.join(", ")}</p>
+              <p><strong>Direct:</strong> {fmtList(competitorData?.direct_competitors)}</p>
+              <p><strong>Indirect:</strong> {fmtList(competitorData?.indirect_competitors)}</p>
+              <p><strong>Differentiators:</strong> {fmtList(competitorData?.differentiators)}</p>
             </div>
             <div className="mb-6">
               <h2 className="text-xl font-bold mb-2 border-b pb-1">Risk Assessment</h2>
-              <p><strong>Technical Risks:</strong> {riskData?.technical_risks?.join(", ")}</p>
-              <p><strong>Market Risks:</strong> {riskData?.market_risks?.join(", ")}</p>
-              <p><strong>Mitigation:</strong> {riskData?.mitigation_strategies?.join(", ")}</p>
+              <p><strong>Technical Risks:</strong> {fmtList(riskData?.technical_risks)}</p>
+              <p><strong>Market Risks:</strong> {fmtList(riskData?.market_risks)}</p>
+              <p><strong>Mitigation:</strong> {fmtList(riskData?.mitigation_strategies)}</p>
             </div>
 
             {/* Signature footer */}

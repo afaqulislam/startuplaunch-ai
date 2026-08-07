@@ -20,7 +20,15 @@ async def analyze_project_workflow(project_id: int):
             logger.info(f"[Workflow] Sending idea to orchestrator: {idea_description[:100]}...")
 
             final_report = await orchestrator.run_analysis(idea_description)
-            logger.info(f"[Workflow] Orchestrator finished successfully!")
+            logger.info("[Workflow] Orchestrator finished successfully!")
+
+            # The orchestrator must return a dict; anything else is a contract
+            # violation we turn into a clean failure instead of an AttributeError
+            # deep in the report-building code below.
+            if not isinstance(final_report, dict):
+                raise ValueError(
+                    f"Orchestrator returned unexpected type: {type(final_report).__name__}"
+                )
 
             # Extract executive summary
             executive_decision = final_report.get("executive_decision", {})
@@ -46,6 +54,13 @@ async def analyze_project_workflow(project_id: int):
 
         except Exception as e:
             logger.error(f"[Workflow] FAILED for project {project_id}: {e}", exc_info=True)
-            project.status = "failed"
-            project.analysis_started_at = None
-            await db.commit()
+            # Roll back any partially-applied DB work before marking the project
+            # failed. Without this, a failed commit leaves the session needing a
+            # rollback, and the follow-up commit raises PendingRollbackError —
+            # leaving the project stuck in "analyzing" forever.
+            await db.rollback()
+            project = await db.get(Project, project_id)
+            if project is not None:
+                project.status = "failed"
+                project.analysis_started_at = None
+                await db.commit()

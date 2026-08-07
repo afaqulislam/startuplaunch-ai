@@ -2,7 +2,8 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
+from sqlalchemy.exc import IntegrityError
 
 import models, schemas
 from api import deps
@@ -11,6 +12,7 @@ from core.ratelimit import (
     login_ip_limiter,
     login_email_limiter,
     register_limiter,
+    register_email_limiter,
     rate_limit,
     client_ip,
 )
@@ -24,17 +26,27 @@ async def register(
     request: Request,
     db: AsyncSession = Depends(deps.get_db),
 ):
-    rate_limit(register_limiter, client_ip(request))
+    # Store emails lowercased so "User@X.com" and "user@x.com" are one account.
+    email = user.email.lower()
+    await rate_limit(register_limiter, client_ip(request))
+    await rate_limit(register_email_limiter, f"email:{email}")
 
-    result = await db.execute(select(models.User).where(models.User.email == user.email))
+    result = await db.execute(select(models.User).where(func.lower(models.User.email) == email))
     db_user = result.scalars().first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
     hashed_password = security.get_password_hash(user.password)
-    new_user = models.User(email=user.email, hashed_password=hashed_password)
+    new_user = models.User(email=email, hashed_password=hashed_password)
     db.add(new_user)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        # The email check above is not atomic — two concurrent registrations
+        # for the same address can both pass it. Surface the unique-constraint
+        # race as a clean 400 instead of a 500.
+        await db.rollback()
+        raise HTTPException(status_code=400, detail="Email already registered")
     await db.refresh(new_user)
     return new_user
 
@@ -46,10 +58,11 @@ async def login(
     db: AsyncSession = Depends(deps.get_db),
 ):
     ip = client_ip(request)
-    rate_limit(login_ip_limiter, f"ip:{ip}")
-    rate_limit(login_email_limiter, f"email:{form_data.username}")
+    email = form_data.username.lower()
+    await rate_limit(login_ip_limiter, f"ip:{ip}")
+    await rate_limit(login_email_limiter, f"email:{email}")
 
-    result = await db.execute(select(models.User).where(models.User.email == form_data.username))
+    result = await db.execute(select(models.User).where(func.lower(models.User.email) == email))
     user = result.scalars().first()
     if (
         not user
@@ -64,6 +77,27 @@ async def login(
 
     access_token_expires = timedelta(minutes=security.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
+        data={"sub": user.email, "ver": user.token_version},
+        expires_delta=access_token_expires,
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/change-password")
+async def change_password(
+    payload: schemas.ChangePassword,
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_user),
+):
+    if not security.verify_password(payload.current_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+
+    if payload.current_password == payload.new_password:
+        raise HTTPException(status_code=400, detail="New password must be different")
+
+    current_user.hashed_password = security.get_password_hash(payload.new_password)
+    # Bump the token version so every outstanding session is revoked at once.
+    current_user.token_version += 1
+    await db.commit()
+
+    return {"message": "Password changed successfully. Please log in again."}

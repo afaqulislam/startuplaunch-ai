@@ -242,13 +242,13 @@ lucide-react · next-themes · react-to-print</span>
 <b>Backend</b><br><span style="color:#6b7280;font-size:13px">
 FastAPI (async) · Python 3.10+<br>
 SQLAlchemy 2 (async) · Alembic migrations<br>
-python-jose (JWT) · bcrypt</span>
+asyncpg · python-jose (JWT) · bcrypt</span>
 </td>
 <td width="33%" align="center" style="background:#f8fafc;border-radius:12px;padding:16px">
 <b>AI Runtime</b><br><span style="color:#6b7280;font-size:13px">
 Groq · llama-3.3-70b-versatile<br>
 AsyncOpenAI SDK · enforced JSON output<br>
-SQLite (dev) / PostgreSQL (prod)</span>
+SQLite (dev) · PostgreSQL / Neon (prod)</span>
 </td>
 </tr>
 </table>
@@ -276,6 +276,8 @@ backend/                      # FastAPI async API + agent swarm
 ├── database.py               # Async engine + session factory
 ├── models.py                 # User / Project / Report ORM models
 ├── schemas.py                # Pydantic models
+├── requirements.txt          # Python dependencies
+├── .env.example              # Env var template
 └── main.py                   # FastAPI app · CORS · routers
 frontend/                     # Next.js 16 application
 └── src/
@@ -309,12 +311,14 @@ pip install -r requirements.txt
 cp .env.example .env
 # SECRET_KEY:  python -c "import secrets; print(secrets.token_urlsafe(48))"
 # GROQ_API_KEY: your Groq key
+# DATABASE_URL: leave the SQLite default, or paste a Neon/Postgres URL
 
-alembic upgrade head
 uvicorn main:app --reload --port 8000
 ```
 
 Interactive API docs: <http://localhost:8000/docs>
+
+Tables are created automatically on startup — no manual migration step needed. A bare `postgresql://` URL is auto-upgraded to the `asyncpg` driver, so Neon/RDS URLs work as-is.
 
 </td>
 <td width="50%" valign="top" style="background:#0b1020;border-radius:14px;padding:18px">
@@ -347,7 +351,9 @@ Open <http://localhost:3000>, register an account, and launch your first validat
 | -------------- | :------: | ---------------------------------------- | ---------------------------------------------------- |
 | `SECRET_KEY`   | **Yes**  | —                                        | JWT signing secret. API refuses to start without it. |
 | `GROQ_API_KEY` | **Yes**  | —                                        | Groq LLM API key for the agent swarm.                |
-| `DATABASE_URL` |    No    | `sqlite+aiosqlite:///./startuplaunch.db` | Async DB URL — use Postgres in production.           |
+| `DATABASE_URL` |    No    | `sqlite+aiosqlite:///./startuplaunch.db` | Async DB URL — use Postgres/Neon in production. |
+
+> **Note:** a bare `postgresql://` URL is automatically upgraded to the `asyncpg` driver and libpq-only query params (`sslmode`, `channel_binding`) are stripped, so Neon/RDS connection strings work as-is.
 | `CORS_ORIGINS` |    No    | `http://localhost:3000`                  | Comma-separated allowed frontend origins.            |
 
 #### Frontend — `frontend/.env.local`
@@ -499,8 +505,8 @@ npm run build         # production build
 FastAPI + SQLite cannot persist on serverless. Deploy the backend on a long-running platform:
 
 1. Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`.
-2. Set env vars: `SECRET_KEY`, `GROQ_API_KEY`, `CORS_ORIGINS` (your Vercel URL), `DATABASE_URL` (managed **PostgreSQL**).
-3. Run `alembic upgrade head` on deploy.
+2. Set env vars: `SECRET_KEY`, `GROQ_API_KEY`, `CORS_ORIGINS` (your Vercel URL), `DATABASE_URL` (managed **PostgreSQL** — works with Neon/RDS).
+3. Tables are auto-created on startup (`Base.metadata.create_all`); no manual migration step required.
 
 </td>
 </tr>
@@ -525,7 +531,8 @@ FastAPI + SQLite cannot persist on serverless. Deploy the backend on a long-runn
 
 | Status  | Item                                                    |
 | :-----: | ------------------------------------------------------- |
-|  Next   | Postgres + Docker Compose for one-command local setup   |
+|   ✔     | Production Postgres support (asyncpg + Neon-ready)      |
+|  Next   | Docker Compose one-command local setup                   |
 |  Next   | Report history / diffing across re-analyses             |
 | Planned | Industry-specific agent tuning and custom agent builder |
 | Planned | Email verification and password reset flows             |
@@ -568,7 +575,7 @@ Not for a full deployment. The backend is an async FastAPI service with file-bas
 
 <details>
 <summary><b>SQLite or PostgreSQL?</b></summary>
-SQLite works out of the box for local development (`DATABASE_URL` default). For production, set `DATABASE_URL` to a Postgres URL and run `alembic upgrade head`.
+SQLite works out of the box for local development (`DATABASE_URL` default). For production, set `DATABASE_URL` to a Postgres URL (e.g. Neon) — tables are auto-created on startup.
 </details>
 
 ---

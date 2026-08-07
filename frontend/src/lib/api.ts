@@ -63,6 +63,10 @@ export interface ReportContent {
     competitor_analysis?: CompetitorAnalysis | null
     risk_assessment?: RiskAnalysis | null
   }
+  // Set by the orchestrator when one or more swarm agents failed but the
+  // successful sections were still saved.
+  _partial?: boolean
+  _agent_errors?: Record<string, string>
 }
 
 export interface AuthResponse {
@@ -84,6 +88,21 @@ export function getToken(): string | null {
 
 export function clearToken(): void {
   localStorage.removeItem("token")
+}
+
+// SQLite returns naive datetimes like "2026-08-07 12:34:56" (no timezone and a
+// space instead of a "T"), which browsers parse as Invalid Date. Normalize to
+// an ISO string (interpreted as UTC) so every date renders consistently across
+// dev (SQLite) and prod (Postgres).
+export function parseDate(value: string): Date {
+  let iso = value.includes("T") ? value : value.replace(" ", "T")
+  if (!/[zZ]|[+-]\d{2}:?\d{2}$/.test(iso)) iso += "Z"
+  const d = new Date(iso)
+  return isNaN(d.getTime()) ? new Date(0) : d
+}
+
+export function formatDate(value: string): string {
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(parseDate(value))
 }
 
 export class ApiError extends Error {
@@ -114,7 +133,14 @@ export async function apiFetch<T = unknown>(
     let detail = `Request failed (${res.status})`
     try {
       const data = await res.json()
-      if (data?.detail) detail = String(data.detail)
+      if (data?.detail) {
+        if (Array.isArray(data.detail)) {
+          // FastAPI validation errors: detail is an array of {loc, msg, type}.
+          detail = data.detail.map((d: { msg?: string }) => d?.msg ?? String(d)).join(", ")
+        } else {
+          detail = String(data.detail)
+        }
+      }
     } catch {
       // non-JSON error body; keep the fallback message
     }

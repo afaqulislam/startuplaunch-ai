@@ -43,13 +43,26 @@ def client():
 
 @pytest.fixture(autouse=True)
 def _reset_rate_limits():
-    """The in-memory rate limiter is process-global; reset it between tests so
-    each test starts from a clean slate."""
-    from core.ratelimit import login_ip_limiter, login_email_limiter, register_limiter
+    """The rate limiter (in-memory or Redis) is process-global; reset it between
+    tests so each test starts from a clean slate."""
+    import asyncio
 
-    login_ip_limiter.clear()
-    login_email_limiter.clear()
-    register_limiter.clear()
+    from core.ratelimit import (
+        login_ip_limiter,
+        login_email_limiter,
+        register_limiter,
+        register_email_limiter,
+        analyze_limiter,
+    )
+
+    for limiter in (
+        login_ip_limiter,
+        login_email_limiter,
+        register_limiter,
+        register_email_limiter,
+        analyze_limiter,
+    ):
+        asyncio.run(limiter.clear())
     yield
 
 
@@ -61,13 +74,14 @@ def direct_db():
     def run(query, params=()):
         conn = sqlite3.connect(DB_PATH)
         try:
-            conn.execute(query, params)
+            cur = conn.execute(query, params)
             conn.commit()
+            return cur.lastrowid
         finally:
             conn.close()
 
     def insert_report(project_id, content, executive_summary="Test summary"):
-        run(
+        return run(
             "INSERT INTO reports (project_id, content, executive_summary) VALUES (?, ?, ?)",
             (project_id, json.dumps(content), executive_summary),
         )

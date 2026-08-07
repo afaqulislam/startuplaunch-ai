@@ -55,8 +55,14 @@ export default function NewProjectPage() {
       })
 
       // 2. Trigger async analysis swarm run
-      apiFetch(`/api/projects/${project.id}/analyze`, { method: "POST" })
-        .catch(err => console.error("Analysis error background:", err))
+      try {
+        await apiFetch(`/api/projects/${project.id}/analyze`, { method: "POST" })
+      } catch (err) {
+        // Dispatch can fail (e.g. the per-user rate limit). The project still
+        // exists; its detail page shows the pending state and will surface the
+        // error again if the user re-dispatching is also blocked.
+        console.error("Analysis dispatch failed:", err)
+      }
 
       router.push(`/dashboard/project/${project.id}`)
     } catch (err) {

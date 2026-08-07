@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useMemo, useCallback } from "react"
+import { useEffect, useState, useMemo, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ConfirmDialog } from "@/components/confirm-dialog"
-import { apiFetch, getToken, clearToken, ApiError, type Project } from "@/lib/api"
+import { apiFetch, getToken, clearToken, ApiError, formatDate, type Project } from "@/lib/api"
 import { 
   Plus, 
   Target, 
@@ -25,41 +25,98 @@ import {
   ChevronRight
 } from "lucide-react"
 
+// Page size matches the API's max limit; "Load more" pages beyond the first
+// 100 projects in chunks. Search + status filter server-side so they compose
+// with pagination.
+const PAGE_SIZE = 100
+
+function buildProjectsQuery(skip: number, search: string, status: string): string {
+  const params = new URLSearchParams()
+  params.set("skip", String(skip))
+  params.set("limit", String(PAGE_SIZE))
+  const term = search.trim()
+  if (term) params.set("search", term)
+  if (status !== "all") params.set("status", status)
+  return params.toString()
+}
+
 export default function Dashboard() {
   const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedStatus, setSelectedStatus] = useState<string>("all")
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [actionError, setActionError] = useState("")
+  const [connectionError, setConnectionError] = useState(false)
 
-  const fetchProjects = useCallback(async () => {
+  // Search is filtered server-side (so it composes with pagination), but we
+  // debounce the keystrokes so every character doesn't fire a request.
+  const [debouncedQuery, setDebouncedQuery] = useState("")
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(searchQuery), 400)
+    return () => clearTimeout(t)
+  }, [searchQuery])
+
+  // Tracks how many projects have been fetched so "Load more" continues from
+  // the right offset without stale-closure issues.
+  const pageRef = useRef(0)
+
+  const loadProjects = useCallback(async (reset = false) => {
     const token = getToken()
     if (!token) {
       router.push("/login")
       return
     }
 
+    const nextSkip = reset ? 0 : pageRef.current
     try {
-      const data = await apiFetch<Project[]>("/api/projects/")
-      setProjects(data)
+      const query = buildProjectsQuery(nextSkip, debouncedQuery, selectedStatus)
+      const data = await apiFetch<Project[]>(`/api/projects/?${query}`)
+      setProjects(prev =>
+        reset ? data : [...prev, ...data.filter(d => !prev.some(p => p.id === d.id))]
+      )
+      pageRef.current = nextSkip + data.length
+      setHasMore(data.length === PAGE_SIZE)
+      setConnectionError(false)
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         clearToken()
         router.push("/login")
         return
       }
-      // Quietly handle connection errors while server restarts
+      // A non-HTTP failure means the backend isn't reachable at all.
+      if (!(err instanceof ApiError)) {
+        setConnectionError(true)
+      }
     } finally {
       setLoading(false)
+      setLoadingMore(false)
     }
-  }, [router])
+  }, [debouncedQuery, selectedStatus, router])
+
+  // Merge fresh statuses from the first page into the loaded list so polling
+  // during an analysis run doesn't discard already-loaded pages.
+  const refreshStatuses = useCallback(async () => {
+    try {
+      const query = buildProjectsQuery(0, debouncedQuery, selectedStatus)
+      const data = await apiFetch<Project[]>(`/api/projects/?${query}`)
+      setProjects(prev => {
+        const map = new Map(prev.map(p => [p.id, p]))
+        for (const p of data) map.set(p.id, p)
+        return [...map.values()].sort((a, b) => b.created_at.localeCompare(a.created_at))
+      })
+    } catch {
+      // Silent: polling should never disrupt the UI
+    }
+  }, [debouncedQuery, selectedStatus])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchProjects()
-  }, [fetchProjects])
+    loadProjects(true)
+  }, [loadProjects])
 
   // Polling for analyzing status
   useEffect(() => {
@@ -67,11 +124,11 @@ export default function Dashboard() {
     if (!hasAnalyzing) return
 
     const interval = setInterval(() => {
-      fetchProjects()
+      refreshStatuses()
     }, 4000)
 
     return () => clearInterval(interval)
-  }, [projects, fetchProjects])
+  }, [projects, refreshStatuses])
 
   const handleAnalyze = async (projectId: number, e: React.MouseEvent) => {
     e.stopPropagation()
@@ -83,10 +140,12 @@ export default function Dashboard() {
 
     try {
       await apiFetch(`/api/projects/${projectId}/analyze`, { method: "POST" })
-      fetchProjects()
+      setActionError("")
+      refreshStatuses()
     } catch (err) {
       // Revert the optimistic update so the card reflects the real status
       setProjects(prev => prev.map(p => p.id === projectId ? { ...p, status: previousStatus } : p))
+      setActionError(err instanceof Error ? err.message : "Couldn't start analysis. Check that the backend is running.")
       console.error("Failed to start analysis:", err)
     }
   }
@@ -106,21 +165,15 @@ export default function Dashboard() {
       await apiFetch(`/api/projects/${deleteTarget.id}`, { method: "DELETE" })
       setProjects(prev => prev.filter(p => p.id !== deleteTarget.id))
       setDeleteTarget(null)
+      setActionError("")
     } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Couldn't delete the project.")
       console.error("Failed to delete project:", err)
     }
   }
 
-  // Filtered projects
-  const filteredProjects = useMemo(() => {
-    return projects.filter(project => {
-      const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            (project.industry && project.industry.toLowerCase().includes(searchQuery.toLowerCase()))
-      const matchesStatus = selectedStatus === "all" || project.status === selectedStatus
-      return matchesSearch && matchesStatus
-    })
-  }, [projects, searchQuery, selectedStatus])
+  // Filtering happens server-side (search + status) so it composes with
+  // pagination; `projects` already reflects the active filters.
 
   // Dashboard Stats
   const stats = useMemo(() => {
@@ -134,13 +187,13 @@ export default function Dashboard() {
   const getStatusBadge = (status: string) => {
     switch(status) {
       case "completed": 
-        return <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs">Completed</Badge>
+        return <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs">Completed</Badge>
       case "analyzing": 
-        return <Badge className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-xs animate-pulse">Analyzing...</Badge>
+        return <Badge className="bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 text-xs animate-pulse">Analyzing...</Badge>
       case "failed": 
-        return <Badge className="bg-red-500/10 text-red-400 border border-red-500/30 text-xs">Failed</Badge>
+        return <Badge className="bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30 text-xs">Failed</Badge>
       default: 
-        return <Badge className="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs">Pending</Badge>
+        return <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 text-xs">Pending</Badge>
     }
   }
 
@@ -239,13 +292,43 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Action Error Banner */}
+        {actionError && (
+          <div className="glass-panel p-4 rounded-2xl border border-red-500/30 bg-red-500/5 flex items-start justify-between gap-3">
+            <p className="text-sm text-red-600 dark:text-red-400">{actionError}</p>
+            <button
+              onClick={() => setActionError("")}
+              aria-label="Dismiss error"
+              className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors shrink-0"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        {/* Backend Unreachable Banner */}
+        {connectionError && (
+          <div className="glass-panel p-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 flex items-start justify-between gap-3">
+            <p className="text-sm text-amber-600 dark:text-amber-400">
+              Can&apos;t reach the analysis service. Make sure the backend is running, then reload.
+            </p>
+            <button
+              onClick={() => setConnectionError(false)}
+              aria-label="Dismiss connection warning"
+              className="text-amber-500 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors shrink-0"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {/* Projects Grid */}
         {loading ? (
           <div className="flex flex-col items-center justify-center h-64 space-y-4">
             <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
             <p className="text-sm text-slate-400">Loading your workspace...</p>
           </div>
-        ) : filteredProjects.length === 0 ? (
+        ) : projects.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 glass-panel rounded-3xl border border-border border-dashed text-center p-6 space-y-4">
             <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 dark:text-indigo-400">
               <BrainCircuit className="w-8 h-8" />
@@ -263,13 +346,14 @@ export default function Dashboard() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProjects.map((project) => (
-              <Card 
-                key={project.id} 
-                className="glass-panel glass-panel-hover glow-card-indigo rounded-3xl border border-border cursor-pointer group flex flex-col justify-between overflow-hidden" 
-                onClick={() => router.push(`/dashboard/project/${project.id}`)}
-              >
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projects.map((project) => (
+                <Card 
+                  key={project.id} 
+                  className="glass-panel glass-panel-hover glow-card-indigo rounded-3xl border border-border cursor-pointer group flex flex-col justify-between overflow-hidden" 
+                  onClick={() => router.push(`/dashboard/project/${project.id}`)}
+                >
                 <div>
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start gap-3 mb-2">
@@ -320,7 +404,7 @@ export default function Dashboard() {
                   <CardFooter className="py-3 px-6 border-t border-border flex justify-between items-center text-xs text-muted-foreground bg-muted/60">
                     <div className="flex items-center">
                       <Calendar size={12} className="mr-1.5" />
-                      {new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(project.created_at))}
+                      {formatDate(project.created_at)}
                     </div>
                     <span className="text-indigo-500 dark:text-indigo-400 flex items-center font-semibold">
                       View Report <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
@@ -329,7 +413,22 @@ export default function Dashboard() {
                 </div>
               </Card>
             ))}
-          </div>
+
+            {hasMore && (
+              <div className="flex justify-center pt-4 col-span-full">
+                <Button
+                  variant="outline"
+                  onClick={() => { setLoadingMore(true); loadProjects(false) }}
+                  disabled={loadingMore}
+                  className="border-indigo-500/30 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-500/10 rounded-xl gap-2 text-xs font-semibold"
+                >
+                  {loadingMore ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4 rotate-90" />}
+                  Load More Ideas
+                </Button>
+              </div>
+            )}
+            </div>
+          </>
         )}
 
       </main>

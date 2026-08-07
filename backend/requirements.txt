@@ -12,6 +12,9 @@ aiosqlite
 asyncpg
 python-dotenv
 
+# Optional: required only when REDIS_URL is set (multi-worker rate limiting).
+redis
+
 # Testing
 pytest
 httpx
