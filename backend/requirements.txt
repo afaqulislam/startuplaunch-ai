@@ -11,6 +11,7 @@ python-multipart
 aiosqlite
 asyncpg
 python-dotenv
+reportlab
 
 # Optional: required only when REDIS_URL is set (multi-worker rate limiting).
 redis

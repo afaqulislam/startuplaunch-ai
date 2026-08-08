@@ -160,7 +160,7 @@ export default function LandingPage() {
 
             {/* Subtitle */}
             <p className="animate-slide-up stagger-3 max-w-2xl text-lg sm:text-xl text-foreground/70 dark:text-foreground/80 leading-relaxed font-normal">
-              Stop building in the dark. Dispatch four specialized AI agents to deliver real-time market research, competitor matrices, risk simulations, and executive verdicts — in under 20 seconds.
+              Stop building in the dark. Dispatch four specialized AI agents to deliver instant market research, competitor matrices, risk simulations, and executive verdicts — in under 20 seconds.
             </p>
 
             {/* Hero CTAs */}
@@ -187,7 +187,7 @@ export default function LandingPage() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-cyan-500 dark:text-cyan-400 shrink-0" />
-                <span>Live competitor moat analysis</span>
+                <span>Competitor moat analysis</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-indigo-500 dark:text-indigo-400 shrink-0" />

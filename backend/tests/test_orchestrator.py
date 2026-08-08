@@ -1,14 +1,13 @@
-"""Orchestrator edge cases: partial swarm failures must be preserved, not
-thrown away."""
+"""Orchestrator: dispatches the three specialists and the executive verdict."""
 import asyncio
 
 import pytest
 
-from agents import specialized, executive
+from agents import executive, specialized
 from agents.orchestrator import orchestrator
 
 
-def test_partial_run_keeps_successful_sections(monkeypatch):
+def test_run_analysis_returns_full_report(monkeypatch):
     async def market_run(idea):
         return {"target_market": "X"}
 
@@ -16,10 +15,10 @@ def test_partial_run_keeps_successful_sections(monkeypatch):
         return {"direct_competitors": ["Acme"]}
 
     async def risk_run(idea):
-        raise RuntimeError("GROQ rate limited")
+        return {"technical_risks": ["R"]}
 
     async def exec_run(idea):
-        return {"recommendation": "Go"}
+        return {"recommendation": "Go", "executive_summary": "summary"}
 
     monkeypatch.setattr(specialized.market_agent, "run", market_run)
     monkeypatch.setattr(specialized.competitor_agent, "run", competitor_run)
@@ -28,28 +27,26 @@ def test_partial_run_keeps_successful_sections(monkeypatch):
 
     report = asyncio.run(orchestrator.run_analysis("A startup idea"))
 
-    # Successful sections and the executive verdict are preserved...
-    assert report["market_analysis"] == {"target_market": "X"}
-    assert report["competitor_analysis"] == {"direct_competitors": ["Acme"]}
-    assert report["executive_decision"] == {"recommendation": "Go"}
-    # ...the failed section is flagged, not fabricated...
-    assert "risk_analysis" not in report
-    assert report["_partial"] is True
-    assert "risk_analysis" in report["_agent_errors"]
+    assert report == {
+        "market_analysis": {"target_market": "X"},
+        "competitor_analysis": {"direct_competitors": ["Acme"]},
+        "risk_analysis": {"technical_risks": ["R"]},
+        "executive_decision": {"recommendation": "Go", "executive_summary": "summary"},
+    }
 
 
-def test_run_raises_when_all_specialists_fail(monkeypatch):
+def test_run_analysis_propagates_specialist_failure(monkeypatch):
     async def boom(idea):
-        raise RuntimeError("all agents down")
+        raise RuntimeError("GROQ rate limited")
 
     for agent in (specialized.market_agent, specialized.competitor_agent, specialized.risk_agent):
         monkeypatch.setattr(agent, "run", boom)
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RuntimeError, match="GROQ rate limited"):
         asyncio.run(orchestrator.run_analysis("A startup idea"))
 
 
-def test_executive_failure_yields_partial(monkeypatch):
+def test_run_analysis_propagates_executive_failure(monkeypatch):
     async def ok(idea):
         return {"key": "value"}
 
@@ -60,29 +57,5 @@ def test_executive_failure_yields_partial(monkeypatch):
         monkeypatch.setattr(agent, "run", ok)
     monkeypatch.setattr(executive.executive_agent, "run", boom)
 
-    report = asyncio.run(orchestrator.run_analysis("A startup idea"))
-
-    # The three specialist sections survive even when the verdict step fails.
-    assert report["market_analysis"] == {"key": "value"}
-    assert report["_partial"] is True
-    assert "executive_decision" not in report
-    assert "executive_decision" in report["_agent_errors"]
-
-
-def test_non_dict_agent_output_is_treated_as_failure(monkeypatch):
-    async def string_run(idea):
-        return "not a structured report"
-
-    async def ok(idea):
-        return {"key": "value"}
-
-    monkeypatch.setattr(specialized.market_agent, "run", string_run)
-    monkeypatch.setattr(specialized.competitor_agent, "run", ok)
-    monkeypatch.setattr(specialized.risk_agent, "run", ok)
-    monkeypatch.setattr(executive.executive_agent, "run", ok)
-
-    report = asyncio.run(orchestrator.run_analysis("A startup idea"))
-
-    assert report["_partial"] is True
-    assert "market_analysis" not in report
-    assert "market_analysis" in report["_agent_errors"]
+    with pytest.raises(RuntimeError, match="executive agent down"):
+        asyncio.run(orchestrator.run_analysis("A startup idea"))

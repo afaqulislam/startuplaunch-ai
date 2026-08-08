@@ -27,12 +27,14 @@ export interface MarketAnalysis {
     som?: string | number
   }
   trends?: string[]
+  _sources?: SourceRef[]
 }
 
 export interface CompetitorAnalysis {
   direct_competitors?: string[]
   indirect_competitors?: string[]
   differentiators?: string[]
+  _sources?: SourceRef[]
 }
 
 export interface RiskAnalysis {
@@ -40,6 +42,12 @@ export interface RiskAnalysis {
   market_risks?: string[]
   execution_risks?: string[]
   mitigation_strategies?: string[]
+  _sources?: SourceRef[]
+}
+
+export interface SourceRef {
+  title?: string
+  url: string
 }
 
 export interface ExecutiveDecision {

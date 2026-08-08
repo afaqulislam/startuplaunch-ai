@@ -1,9 +1,8 @@
 "use client"
 
-import { useEffect, useState, useRef, use, useCallback } from "react"
+import { useEffect, useState, use, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { useReactToPrint } from "react-to-print"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -14,10 +13,12 @@ import {
   getToken,
   clearToken,
   ApiError,
+  API_BASE_URL,
   type Project,
   type MarketAnalysis,
   type CompetitorAnalysis,
   type RiskAnalysis,
+  type SourceRef,
 } from "@/lib/api"
 import { 
   ArrowLeft, 
@@ -38,7 +39,8 @@ import {
   Building2,
   Target,
   Check,
-  RefreshCw
+  RefreshCw,
+  ExternalLink
 } from "lucide-react"
 
 // ── Helper components ────────────────────────────────────────────────────────
@@ -67,10 +69,6 @@ function SectionLabel({ label }: { label: string }) {
   return <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-3">{label}</p>
 }
 
-function fmtList(items?: string[]) {
-  return items && items.length > 0 ? items.join(", ") : "N/A"
-}
-
 // LLMs are inconsistent about casing ("GO", "go", "No-Go", "nogo", "Pivot").
 // Normalize so the verdict banner and its colors always match.
 function normalizeRecommendation(value: string | null | undefined): string | null {
@@ -95,6 +93,29 @@ function normalizeTakeaways(value: unknown): string[] {
       .filter(Boolean)
   }
   return []
+}
+
+function SourcesList({ sources }: { sources?: SourceRef[] }) {
+  if (!sources || sources.length === 0) return null
+  return (
+    <div className="pt-4 border-t border-border space-y-2">
+      <SectionLabel label="Sources — Live Web Research" />
+      <div className="flex flex-wrap gap-2">
+        {sources.map((s, i) => (
+          <a
+            key={i}
+            href={s.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-300 font-medium glass-panel px-3 py-1.5 rounded-full border border-indigo-500/30 hover:bg-indigo-500/10 transition-colors max-w-full"
+          >
+            <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{s.title || s.url}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 function MarketTab({ data }: { data?: MarketAnalysis | null }) {
@@ -133,6 +154,7 @@ function MarketTab({ data }: { data?: MarketAnalysis | null }) {
           </div>
         </div>
       )}
+      <SourcesList sources={data._sources} />
     </div>
   )
 }
@@ -153,6 +175,7 @@ function CompetitorTab({ data }: { data?: CompetitorAnalysis | null }) {
         <SectionLabel label="Your Unfair Differentiators & Moat" />
         <TagList items={data.differentiators} color="emerald" />
       </div>
+      <SourcesList sources={data._sources} />
     </div>
   )
 }
@@ -189,6 +212,7 @@ function RiskTab({ data }: { data?: RiskAnalysis | null }) {
           </div>
         </div>
       )}
+      <SourcesList sources={data._sources} />
     </div>
   )
 }
@@ -206,9 +230,6 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [actionError, setActionError] = useState("")
-
-  const contentRef = useRef<HTMLDivElement>(null)
-  const reactToPrintFn = useReactToPrint({ contentRef })
 
   const fetchProject = useCallback(async () => {
     const token = getToken()
@@ -268,6 +289,41 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
       setProject(prev => prev ? { ...prev, status: previousStatus } : prev)
       setActionError(err instanceof Error ? err.message : "Couldn't start analysis. Check that the backend is running.")
       console.error("Failed to start analysis:", err)
+    }
+  }
+
+  const handleExportPdf = async () => {
+    const token = getToken()
+    if (!token || !project?.report?.id) return
+
+    try {
+      // The backend generates a professional, device-independent PDF; the
+      // browser only saves the bytes (no print dialog / web-page snapshot).
+      const res = await fetch(`${API_BASE_URL}/api/reports/${project.report.id}/pdf`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (res.status === 401) {
+        clearToken()
+        router.push("/login")
+        return
+      }
+      if (!res.ok) {
+        setActionError("Couldn't generate the PDF report.")
+        return
+      }
+
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${project.title.replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "_")}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error("Failed to export PDF:", err)
+      setActionError("Couldn't download the PDF report.")
     }
   }
 
@@ -389,7 +445,7 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
             )}
 
             {isCompleted && hasReport && (
-              <Button variant="outline" onClick={() => reactToPrintFn()} className="text-foreground border-border hover:bg-muted rounded-xl text-xs">
+              <Button variant="outline" onClick={handleExportPdf} className="text-foreground border-border hover:bg-muted rounded-xl text-xs">
                 <Download className="mr-2 h-4 w-4" /> Export PDF
               </Button>
             )}
@@ -653,57 +709,6 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
 
           </div>
         )}
-
-        {/* Print-Only Export Container */}
-        <div style={{ display: "none" }}>
-          <div ref={contentRef} className="p-10 text-black bg-white min-h-screen font-sans relative">
-            {/* Watermark stamp — repeats on every printed page */}
-            <div className="print-watermark" aria-hidden="true">
-              <div className="print-watermark-inner">
-                <span className="print-watermark-name">Afaq Ul Islam</span>
-                <span className="print-watermark-role">Founder · StartupLaunch AI</span>
-              </div>
-            </div>
-
-            <div className="mb-8 border-b pb-6">
-              <h1 className="text-4xl font-extrabold mb-2">{project.title}</h1>
-              <p className="text-gray-600">{project.description}</p>
-              <div className="flex gap-6 mt-3 text-sm text-gray-500">
-                <span><strong>Target Audience:</strong> {project.target_audience || "N/A"}</span>
-                <span><strong>Industry:</strong> {project.industry || "N/A"}</span>
-              </div>
-              {recommendation && <p className="mt-3 font-bold text-lg">AI Verdict: <span>{recommendation}</span></p>}
-            </div>
-            <div className="mb-6">
-              <h2 className="text-xl font-bold mb-2 border-b pb-1">Executive Summary</h2>
-              <p className="text-gray-800 leading-relaxed">{executiveSummary}</p>
-            </div>
-            <div className="mb-6">
-              <h2 className="text-xl font-bold mb-2 border-b pb-1">Market Research</h2>
-              <p><strong>Target Market:</strong> {marketData?.target_market || "N/A"}</p>
-              <p className="mt-1"><strong>Market Size:</strong> TAM: {marketData?.market_size?.tam || "N/A"} | SAM: {marketData?.market_size?.sam || "N/A"} | SOM: {marketData?.market_size?.som || "N/A"}</p>
-              <p className="mt-1"><strong>Trends:</strong> {fmtList(marketData?.trends)}</p>
-            </div>
-            <div className="mb-6">
-              <h2 className="text-xl font-bold mb-2 border-b pb-1">Competitor Analysis</h2>
-              <p><strong>Direct:</strong> {fmtList(competitorData?.direct_competitors)}</p>
-              <p><strong>Indirect:</strong> {fmtList(competitorData?.indirect_competitors)}</p>
-              <p><strong>Differentiators:</strong> {fmtList(competitorData?.differentiators)}</p>
-            </div>
-            <div className="mb-6">
-              <h2 className="text-xl font-bold mb-2 border-b pb-1">Risk Assessment</h2>
-              <p><strong>Technical Risks:</strong> {fmtList(riskData?.technical_risks)}</p>
-              <p><strong>Market Risks:</strong> {fmtList(riskData?.market_risks)}</p>
-              <p><strong>Mitigation:</strong> {fmtList(riskData?.mitigation_strategies)}</p>
-            </div>
-
-            {/* Signature footer */}
-            <div className="print-footer" aria-hidden="true">
-              <span>StartupLaunch AI</span>
-              <span>Generated {new Intl.DateTimeFormat("en-GB", { dateStyle: "long" }).format(new Date())} · Afaq Ul Islam, Founder</span>
-            </div>
-          </div>
-        </div>
 
       </div>
 

@@ -21,6 +21,10 @@ _is_sqlite = "sqlite" in SQLALCHEMY_DATABASE_URL
 engine = create_async_engine(
     SQLALCHEMY_DATABASE_URL,
     connect_args={"check_same_thread": False} if _is_sqlite else {},
+    # Validate pooled connections before reuse so a connection dropped by the
+    # database server (restart, idle timeout) is transparently replaced instead
+    # of raising "connection is closed".
+    pool_pre_ping=True,
 )
 
 

@@ -35,3 +35,46 @@ def test_report_not_found(client):
 
 def test_report_requires_auth(client):
     assert client.get("/api/reports/1").status_code == 401
+
+
+def test_report_pdf_export(client, direct_db):
+    token = register_and_login(client, "pdf_owner@example.com")
+    project_id = client.post(
+        "/api/projects/",
+        json={"title": "PDF Project", "description": "Description"},
+        headers=auth_headers(token),
+    ).json()["id"]
+
+    content = {
+        "market_analysis": {"target_market": "Devs", "market_size": {"tam": "$1B", "sam": "$100M", "som": "$10M"}, "trends": []},
+        "competitor_analysis": {"direct_competitors": [], "indirect_competitors": [], "differentiators": []},
+        "risk_analysis": {"technical_risks": [], "market_risks": [], "execution_risks": [], "mitigation_strategies": []},
+        "executive_decision": {"executive_summary": "Good", "recommendation": "Go", "key_takeaways": []},
+    }
+    report_id = direct_db["insert_report"](project_id, content)
+
+    res = client.get(f"/api/reports/{report_id}/pdf", headers=auth_headers(token))
+    assert res.status_code == 200
+    assert res.headers["content-type"] == "application/pdf"
+    assert "attachment" in res.headers["content-disposition"]
+    assert "PDF_Project.pdf" in res.headers["content-disposition"]
+    assert res.content.startswith(b"%PDF")
+
+
+def test_report_pdf_export_requires_auth(client):
+    assert client.get("/api/reports/1/pdf").status_code == 401
+
+
+def test_report_pdf_ownership_enforced(client, direct_db):
+    token_a = register_and_login(client, "pdf_owner_a@example.com")
+    token_b = register_and_login(client, "pdf_owner_b@example.com")
+
+    project_id = client.post(
+        "/api/projects/",
+        json={"title": "Private", "description": "Description"},
+        headers=auth_headers(token_a),
+    ).json()["id"]
+    report_id = direct_db["insert_report"](project_id, {"executive_decision": {}})
+
+    res = client.get(f"/api/reports/{report_id}/pdf", headers=auth_headers(token_b))
+    assert res.status_code == 403

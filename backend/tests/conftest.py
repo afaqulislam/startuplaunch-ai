@@ -7,6 +7,9 @@ import json
 os.environ["SECRET_KEY"] = "test-secret-key-for-tests-only"
 os.environ["GROQ_API_KEY"] = "test-dummy-key"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///./test_startuplaunch.db"
+# Tests must never depend on an external Redis (or a developer's local .env),
+# so force the in-memory rate limiter. load_dotenv() won't override this.
+os.environ["REDIS_URL"] = ""
 
 import pytest
 from fastapi.testclient import TestClient

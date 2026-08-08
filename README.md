@@ -60,7 +60,7 @@ Validate your startup idea in minutes with a swarm of specialized AI agents that
     - [Report Schema](#report-schema)
 - [Data Model](#data-model)
 - [Testing & Quality](#testing--quality)
-    - [Backend — pytest (27 tests)](#backend--pytest-27-tests)
+    - [Backend — pytest (41 tests)](#backend--pytest-41-tests)
     - [Frontend — quality gates](#frontend--quality-gates)
 - [Performance & Reliability](#performance--reliability)
 - [Deployment](#deployment)
@@ -99,7 +99,7 @@ It is a full-stack web application (Next.js + FastAPI monorepo) that:
 <tr>
 <td align="center" width="20%" style="background:#f8fafc;border-radius:10px;padding:12px"><b style="color:#4338ca">Full-Stack</b><br><span style="color:#6b7280;font-size:13px">Next.js + FastAPI monorepo</span></td>
 <td align="center" width="20%" style="background:#f8fafc;border-radius:10px;padding:12px"><b style="color:#0e7490">4 AI Agents</b><br><span style="color:#6b7280;font-size:13px">Parallel swarm pipeline</span></td>
-<td align="center" width="20%" style="background:#f8fafc;border-radius:10px;padding:12px"><b style="color:#047857">PDF Reports</b><br><span style="color:#6b7280;font-size:13px">Branded &amp; print-ready</span></td>
+<td align="center" width="20%" style="background:#f8fafc;border-radius:10px;padding:12px"><b style="color:#047857">PDF Reports</b><br><span style="color:#6b7280;font-size:13px">Server-side, professional &amp; watermarked</span></td>
 <td align="center" width="20%" style="background:#f8fafc;border-radius:10px;padding:12px"><b style="color:#b45309">JWT Auth</b><br><span style="color:#6b7280;font-size:13px">bcrypt + rate limiting</span></td>
 <td align="center" width="20%" style="background:#f8fafc;border-radius:10px;padding:12px"><b style="color:#dc2626">Crash-Safe</b><br><span style="color:#6b7280;font-size:13px">Auto-recovery workflow</span></td>
 </tr>
@@ -159,6 +159,8 @@ The full request lifecycle:
 
 A lightweight orchestration layer fans an idea out to **three specialists running in parallel**, then a fourth agent synthesizes everything into an executive decision — powered by Groq's `llama-3.3-70b-versatile` with **enforced structured JSON output**.
 
+Every specialist analyzes from its own knowledge and reasoning; uncertain figures are explicitly labeled as estimates, so the report never presents guessed numbers as fact.
+
 ```text
                           ┌─────────────────────┐
                           │   Your Startup Idea  │
@@ -210,10 +212,10 @@ A lightweight orchestration layer fans an idea out to **three specialists runnin
 
 **Resilience by design**
 
-- **Fail loudly, never fabricate.** Agents reject empty responses, malformed JSON, and non-object output. A report is only marked `completed` if the data is real.
-- **Partial runs are preserved.** If one specialist fails, the successful sections are still saved and the report is flagged `_partial` — the UI shows an amber banner and offers a re-run, so one transient failure never wipes out good work.
-- **Structured output everywhere.** The orchestrator requires a `dict` from the executive agent; anything else becomes a clean, recorded failure instead of a crash deep in report-building code.
-- **Bounded spend.** Each swarm run is capped at a hard **300-second timeout**, and per-user dispatch is rate-limited.
+- **Honest, not hallucinated.** Each specialist analyzes from its own knowledge and is instructed to label anything uncertain as an estimate (e.g. `~$5B (estimate)`) instead of presenting it as fact.
+- **Fail loudly, never fabricate.** Agents reject empty responses and malformed JSON. A report is only marked `completed` if the data is real; if an agent fails, the project is marked `failed` so you know the analysis did not finish.
+- **Structured output everywhere.** Enforced JSON mode on Groq, with a strict parser that tolerates markdown fences but rejects anything that is not a JSON object.
+- **Bounded spend.** Each swarm run is capped at a hard **120-second timeout**, and per-user dispatch is rate-limited.
 
 ---
 
@@ -238,7 +240,7 @@ A lightweight orchestration layer fans an idea out to **three specialists runnin
 </tr>
 <tr>
 <td width="50%" style="border-left:4px solid #8b5cf6;padding:12px 16px;background:#fcfaff;border-radius:8px">
-<b>PDF export</b><br>Polished, branded, print-ready reports via react-to-print.
+<b>PDF export</b><br>Professional, branded, device-independent PDF generated server-side (reportlab) — no browser print dialog.
 </td>
 <td width="50%" style="border-left:4px solid #ef4444;padding:12px 16px;background:#fffafa;border-radius:8px">
 <b>Crash-safe workflow</b><br>Stuck runs auto-recover after 10 minutes; each swarm run caps at 300 seconds.
@@ -285,18 +287,20 @@ A lightweight orchestration layer fans an idea out to **three specialists runnin
 <b>Frontend</b><br><span style="color:#6b7280;font-size:13px">
 Next.js 16 (App Router) · React 19 · TypeScript 5<br>
 Tailwind CSS v4 · Base UI + shadcn-style kit<br>
-lucide-react · next-themes · react-to-print</span>
+lucide-react · next-themes</span>
 </td>
 <td width="33%" align="center" style="background:#f8fafc;border-radius:12px;padding:16px">
 <b>Backend</b><br><span style="color:#6b7280;font-size:13px">
 FastAPI (async) · Python 3.10+<br>
 SQLAlchemy 2 (async) · Alembic migrations<br>
-asyncpg · python-jose (JWT) · bcrypt</span>
+asyncpg · python-jose (JWT) · bcrypt<br>
+reportlab (server-side PDF export)</span>
 </td>
 <td width="33%" align="center" style="background:#f8fafc;border-radius:12px;padding:16px">
 <b>AI Runtime</b><br><span style="color:#6b7280;font-size:13px">
 Groq · llama-3.3-70b-versatile<br>
-AsyncOpenAI SDK · enforced JSON output<br>
+OpenAI SDK · enforced JSON output (Groq endpoint)<br>
+Fast parallel agent swarm<br>
 Redis-backed rate limiting (optional)<br>
 SQLite (dev) · PostgreSQL / Neon (prod)</span>
 </td>
@@ -311,8 +315,8 @@ SQLite (dev) · PostgreSQL / Neon (prod)</span>
 startuplaunch-ai/
 ├── backend/                       # FastAPI async API + agent swarm
 │   ├── agents/
-│   │   ├── base.py                # BaseAgent: Groq client, retries, strict JSON extraction
-│   │   ├── orchestrator.py        # Parallel swarm runner (gather + 300s timeout + partial runs)
+│   │   ├── base.py                # BaseAgent: OpenAI-compatible Groq client, strict JSON extraction
+│   │   ├── orchestrator.py        # Parallel swarm runner (gather + 120s timeout)
 │   │   ├── specialized.py         # Market · Competitor · Risk agents
 │   │   └── executive.py           # Go / No-Go / Pivot decision agent
 │   ├── api/
@@ -322,8 +326,9 @@ startuplaunch-ai/
 │   │   ├── security.py            # JWT + bcrypt, fail-closed SECRET_KEY
 │   │   └── ratelimit.py           # Sliding-window limiter (in-memory or Redis)
 │   ├── services/workflow.py       # Background analysis workflow (report persistence)
+│   ├── services/pdf_export.py     # Server-side professional PDF generation (reportlab)
 │   ├── alembic/                   # DB migrations (initial · analysis_started_at · token_version)
-│   ├── tests/                     # 27 pytest tests (auth · projects · reports · orchestrator)
+│   ├── tests/                     # 41 pytest tests (auth · projects · reports · orchestrator · agents)
 │   ├── database.py                # Async engine + session factory + SQLite FK pragma
 │   ├── models.py                  # User / Project / Report ORM models
 │   ├── schemas.py                 # Pydantic models + input validation constraints
@@ -373,6 +378,7 @@ cp .env.example .env
 # SECRET_KEY:  python -c "import secrets; print(secrets.token_urlsafe(48))"
 # GROQ_API_KEY: your Groq key
 # DATABASE_URL: leave the SQLite default, or paste a Neon/Postgres URL
+# REDIS_URL: optional, e.g. redis://default:PASSWORD@host.db.redis.io:PORT
 
 uvicorn main:app --reload --port 8000
 ```
@@ -404,7 +410,7 @@ Open <http://localhost:3000>, register an account, and launch your first validat
 4. Within seconds-to-a-minute the project completes and **View Report** opens the tabbed report:
    - **Overview** — the executive verdict, summary, and key takeaways.
    - **Market / Competitors / Risk** tabs with structured findings.
-   - **Download PDF** — print-ready export of the full report.
+   - **Download PDF** — server-side generated, professional A4 document with branded watermark, identical on every device.
 5. Re-analyze any time with the **Re-analyze** button; delete with the trash icon (confirmed via dialog).
 
 ---
@@ -416,12 +422,15 @@ Open <http://localhost:3000>, register an account, and launch your first validat
 | Variable       | Required | Default                                  | Description                                          |
 | -------------- | :------: | ---------------------------------------- | ---------------------------------------------------- |
 | `SECRET_KEY`   | **Yes**  | —                                        | JWT signing secret. API refuses to start without it. |
-| `GROQ_API_KEY` | **Yes**  | —                                        | Groq LLM API key for the agent swarm.                |
+| `GROQ_API_KEY` | **Yes**  | —                                        | Groq API key for the agent swarm.                    |
+| `GROQ_MODEL`   |    No    | `llama-3.3-70b-versatile`                | Agent model. Supports enforced JSON output. The `groq/compound` / `groq/compound-mini` models enable built-in web search but can hit intermittent 413 "Request Entity Too Large" errors on Groq's free tier. |
 | `DATABASE_URL` |    No    | `sqlite+aiosqlite:///./startuplaunch.db` | Async DB URL — use Postgres/Neon in production.      |
 | `CORS_ORIGINS` |    No    | `http://localhost:3000`                  | Comma-separated allowed frontend origins.            |
-| `REDIS_URL`    |    No    | —                                        | Enables Redis-backed rate limiting (multi-worker).   |
+| `REDIS_URL`    |    No    | —                                        | Redis connection string; enables Redis-backed rate limiting (multi-worker). Use `redis://` for plain TCP, `rediss://` for TLS. |
 
 > **Note:** a bare `postgresql://` URL is automatically upgraded to the `asyncpg` driver and libpq-only query params (`sslmode`, `channel_binding`) are stripped, so Neon/RDS connection strings work as-is.
+
+> **Redis:** when `REDIS_URL` is set (and the `redis` package is installed), startup logs `Using Redis-backed rate limiting` and every rate-limit attempt is stored as a Redis sorted-set key under the `sl_ratelimit:*` prefix. When unset, an in-process sliding window is used — fine for a single worker. Redis Cloud URLs such as `redis://default:<password>@<host>.db.redis.io:<port>` work as-is; use `rediss://` only if your instance requires TLS.
 
 ### Frontend — `frontend/.env.local`
 
@@ -449,7 +458,8 @@ Open <http://localhost:3000>, register an account, and launch your first validat
 | `GET`    | `/api/projects/{id}`         | Project detail including its report                                |
 | `POST`   | `/api/projects/{id}/analyze` | Kick off the swarm in the background (rate-limited per user)       |
 | `DELETE` | `/api/projects/{id}`         | Delete a project + report (cascade)                                |
-| `GET`    | `/api/reports/{id}`          | Fetch a report by id (owner-scoped, 403 otherwise)                 |
+| `GET`    | `/api/reports/{id}`          | Fetch a report by id (owner-scoped, 403 otherwise)                   |
+| `GET`    | `/api/reports/{id}/pdf`      | Download a professional server-side PDF of the report (owner-scoped) |
 
 ### Query Parameters & Rate Limits
 
@@ -505,6 +515,11 @@ curl -X POST http://localhost:8000/api/auth/change-password \
   -H "Authorization: Bearer <TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{"current_password":"supersecret","new_password":"evenbettersecret"}'
+
+# 7. Download the professional PDF report (saved as <title>.pdf)
+curl -X GET http://localhost:8000/api/reports/1/pdf \
+  -H "Authorization: Bearer <TOKEN>" \
+  --output report.pdf
 ```
 
 ### Report Schema
@@ -537,15 +552,11 @@ The persisted report lives in `Report.content` (JSON). A successful run contains
 }
 ```
 
-When one or more agents fail mid-run, the saved content is marked **partial** so consumers can tell a degraded report from a complete one:
+If any agent fails (rate limit, timeout, invalid output), the run fails and the project is marked `failed` — so you always know the analysis did not finish, and you can simply re-run. No section is ever presented as a complete report when it wasn't.
 
-```json
-{
-  "market_analysis": { "..." : "..." },
-  "_partial": true,
-  "_agent_errors": { "risk_analysis": "Agent timed out" }
-}
-```
+### PDF Export
+
+`GET /api/reports/{id}/pdf` renders the report into a professional A4 PDF on the server (`reportlab`), so every device downloads the exact same document. The export includes the project header, an AI verdict banner (color-coded Go / No-Go / Pivot), executive summary with key takeaways, TAM/SAM/SOM metrics, and bulleted competitor/risk findings — plus a diagonal semi-transparent watermark on every page. The legacy report shapes (`specialized_reports`, `market_research`, etc.) are handled automatically.
 
 ---
 
@@ -572,20 +583,21 @@ users ──1── N── projects ──1── 1── reports
 
 ## Testing & Quality ![Testing & Quality](https://img.shields.io/badge/Testing%20%26%20Quality-22c55e?style=flat-square&logo=flask&logoColor=white)
 
-### Backend — pytest (27 tests)
+### Backend — pytest (41 tests)
 
 ```bash
 cd backend
 venv\Scripts\python.exe -m pytest tests -q
-# 27 passed — auth (10) · projects (10) · reports (3) · orchestrator (4)
+# 41 passed — auth (10) · projects (10) · reports (6) · orchestrator (4) · agents (11)
 ```
 
 Covered behaviors include:
 
 - **Auth**: registration, duplicate emails, case-insensitive matching, weak/invalid input rejection, wrong/unknown/inactive-user logins, and **token revocation on password change**.
-- **Projects**: full lifecycle, atomic run claiming, stale-run recovery sweeps, pagination validation, cross-user access denial, **server-side search & status filtering**, **partial-report persistence**, and **per-user analyze rate limiting**.
-- **Reports**: ownership enforcement (403), 404 handling, and auth requirement.
-- **Orchestrator**: partial runs keep successful sections, all-fail raises, executive failure yields partial output, non-dict output treated as failure.
+- **Projects**: full lifecycle, atomic run claiming, stale-run recovery sweeps, pagination validation, cross-user access denial, **server-side search & status filtering**, **failed-run marking**, and **per-user analyze rate limiting**.
+- **Reports**: ownership enforcement (403), 404 handling, auth requirement, and **server-side PDF export** (valid PDF bytes, correct content-type, download filename, and cross-user 403 on the `/pdf` endpoint).
+- **Orchestrator**: full 4-section report shape (three specialists + executive verdict), failure propagation from any agent.
+- **Agents**: strict JSON extraction (markdown fences rejected, missing/invalid JSON raises), and default model check (`llama-3.3-70b-versatile`).
 
 ### Frontend — quality gates
 
@@ -604,12 +616,12 @@ All three gates are green in CI-style local runs (zero TypeScript errors, zero l
 
 | Concern              | Behavior                                                                   |
 | -------------------- | -------------------------------------------------------------------------- |
-| Swarm timeout        | Hard **300-second cap** per run so a hung LLM call never blocks forever.   |
+| Swarm timeout        | Hard **120-second cap** per run so a hung LLM call never blocks forever.   |
 | Stuck-run recovery   | Runs stuck in `analyzing` are swept to `failed` after **10 minutes** at startup and before re-analysis — safe to re-dispatch. |
 | Double-dispatch      | Runs are claimed with a single atomic `UPDATE`; concurrent requests return 400. |
 | Polling              | Dashboard polls every **4 seconds** while any run is `analyzing`.          |
-| Transient failures   | Each agent retries up to 2 times with exponential backoff + jitter.        |
-| Partial results      | A failing specialist never discards the other agents' completed work.      |
+| Transient failures   | No silent retries — an agent failure fails the run and the project is marked `failed`, so rate limits are visible instead of hidden. |
+| Failed runs          | A failed run marks the project `failed` (never a fabricated report); re-dispatch anytime to retry. |
 | LLM spend control    | Swarm dispatch is rate-limited to 5 runs / 15 minutes per user.            |
 
 ---
@@ -695,27 +707,37 @@ Three migrations are provided: the initial schema, `analysis_started_at`, and `t
 
 <details>
 <summary><b>How does the validation actually work?</b></summary>
-You describe your idea, and the orchestrator dispatches three specialist agents — Market Research, Competitor Analysis, Risk Assessment — in parallel. An Executive Decision agent then synthesizes their findings into a Go / No-Go / Pivot verdict with an executive summary and key takeaways. Everything is stored as structured JSON and rendered as a tabbed report.
+You describe your idea, and the orchestrator dispatches three specialist agents — Market Research, Competitor Analysis, Risk Assessment — in parallel, each analyzing from its own knowledge and labeling uncertain figures as estimates. An Executive Decision agent then synthesizes their findings into a Go / No-Go / Pivot verdict with an executive summary and key takeaways. Everything is stored as structured JSON and rendered as a tabbed report.
+</details>
+
+<details>
+<summary><b>Does this work with live web search?</b></summary>
+Live web search is off by default. The default model (`llama-3.3-70b-versatile`) answers from its own knowledge with uncertain figures labeled as estimates. You can opt into Groq's built-in web search by setting `GROQ_MODEL=groq/compound-mini`, but note the compound models can hit intermittent 413 "Request Entity Too Large" errors on Groq's free tier.
 </details>
 
 <details>
 <summary><b>Which LLM powers the agents?</b></summary>
-The swarm runs on Groq's `llama-3.3-70b-versatile`, accessed through the OpenAI SDK with enforced JSON output. The model and instructions are configurable in `backend/agents/base.py` and `backend/agents/specialized.py`.
+The swarm runs on Groq's `llama-3.3-70b-versatile` (enforced JSON output), accessed through the OpenAI SDK pointed at Groq's OpenAI-compatible endpoint. Set `GROQ_MODEL` to switch models — e.g. `groq/compound-mini` opts into live web search. Model and instructions are configurable in `backend/agents/base.py` and `backend/agents/specialized.py`.
 </details>
 
 <details>
 <summary><b>How long does an analysis take?</b></summary>
-Most runs complete in under 20 seconds. Every swarm run is capped at a hard 300-second (5-minute) timeout so a hung LLM call can never block forever.
+Most runs complete in under a minute (the three specialists run in parallel, so the latency is roughly one agent's answer time). Every swarm run is capped at a hard 120-second timeout so a hung LLM call can never block forever.
 </details>
 
 <details>
 <summary><b>What happens if one agent fails mid-run?</b></summary>
-The successful sections are still saved and the report is flagged as partial (`_partial: true` with a list of which agents errored). The UI shows an amber banner and lets you re-run. Only a complete swarm failure marks the project `failed`.
+If any agent fails mid-run, the whole run fails and the project is marked `failed` so you can re-run. Nothing partial is ever shown as complete.
 </details>
 
 <details>
 <summary><b>Can I re-run an analysis on the same project?</b></summary>
 Yes. Re-dispatching replaces the previous report. If a run is left stuck in "analyzing" (e.g. after a server restart), it auto-recovers after 10 minutes so you can safely re-run.
+</details>
+
+<details>
+<summary><b>How is the PDF report generated?</b></summary>
+Server-side with `reportlab`. Clicking **Export PDF** downloads a real `.pdf` file (A4, branded, watermarked) straight from `GET /api/reports/{id}/pdf` — no browser print dialog, so the document looks identical on every device and browser.
 </details>
 
 <details>
@@ -726,6 +748,11 @@ Every JWT embeds a token version. Changing your password bumps that version, so 
 <details>
 <summary><b>Is my data private?</b></summary>
 Yes. Authentication is required, and every project and report query is scoped to the authenticated user. Reports are only visible to their owner (cross-user access returns 403).
+</details>
+
+<details>
+<summary><b>Why do I get 429 / rate-limit errors during analysis?</b></summary>
+The free Groq tier allows a limited number of tokens per minute (TPM). Running several analyses back-to-back can exhaust that minute's budget. The swarm handles this gracefully: all Groq calls are serialized through one gate, and on a 429 the exact wait time Groq reports is honored before retrying — so a run completes on the first free minute instead of failing. Waiting ~30-60 seconds before re-running also helps on the free tier.
 </details>
 
 <details>
@@ -740,7 +767,7 @@ SQLite works out of the box for local development (`DATABASE_URL` default). For 
 
 <details>
 <summary><b>Why Redis?</b></summary>
-Rate limiting uses an in-process sliding window by default — perfect for single-worker dev. When `REDIS_URL` is set, it switches to a Redis sorted-set backend so limits stay consistent across multiple workers in production.
+Rate limiting uses an in-process sliding window by default — perfect for single-worker dev. When `REDIS_URL` is set, it switches to a Redis sorted-set backend so limits stay consistent across multiple workers in production. You can confirm it's active from the startup log (`Using Redis-backed rate limiting`) or by listing the `sl_ratelimit:*` keys in Redis after a login/register attempt.
 </details>
 
 ---
@@ -757,7 +784,7 @@ Contributions are welcome and appreciated. To contribute:
 Please keep the quality gates green before submitting:
 
 ```bash
-cd backend && python -m pytest tests -q     # all 27 tests pass
+cd backend && python -m pytest tests -q     # all 41 tests pass
 cd frontend && npx tsc --noEmit && npm run lint
 ```
 

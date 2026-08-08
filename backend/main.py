@@ -5,6 +5,12 @@ import os
 load_dotenv()  # Load .env file before anything else reads env vars
 
 import logging
+
+# Configure logging before importing routers/agents that emit INFO at import
+# time (e.g. the rate limiter announcing its Redis backend), so those messages
+# are not silently dropped by the default WARNING level.
+logging.basicConfig(level=logging.INFO)
+
 from datetime import datetime, timezone, timedelta
 
 from fastapi import FastAPI
@@ -15,7 +21,6 @@ from api.routers import auth, projects, reports
 from database import engine, Base, SessionLocal, _is_sqlite
 from models import Project
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
