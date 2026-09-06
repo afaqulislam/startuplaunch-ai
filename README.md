@@ -168,7 +168,7 @@ Every specialist analyzes from its own knowledge and reasoning; uncertain figure
                                      │
                           ┌──────────▼──────────┐
                           │  SWARM ORCHESTRATOR │
-                          │  (300s hard timeout)│
+                          │  (120s hard timeout)│
                           └──────────┬──────────┘
                                      │
         ┌─────────────────┬──────────┴───────────┬─────────────────┐

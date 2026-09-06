@@ -5,14 +5,19 @@ guarantees a consistent, professional document on every device and removes
 the dependency on the user's print dialog.
 """
 import io
+import os
 import re
 from datetime import datetime
 
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+from reportlab.lib.fonts import addMapping
+from reportlab.pdfbase.pdfmetrics import registerFontFamily
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     Flowable,
     HRFlowable,
@@ -25,6 +30,123 @@ from reportlab.platypus import (
 )
 
 from models import Project, Report
+
+
+def _register_fonts() -> None:
+    """Replace reportlab's built-in Helvetica with DejaVu Sans so any character
+    the LLM writes (Urdu, Hindi, Cyrillic, arrows, symbols) renders instead of
+    printing as empty boxes.
+
+    DejaVu covers Latin, Cyrillic, Greek, Devanagari, Arabic and most symbols.
+    The font files are bundled next to this module so it works in serverless
+    too; if they are missing we fall back to the built-in Latin-only fonts.
+    """
+    FONT_SRC = {
+        "DejaVuSans": "DejaVuSans.ttf",
+        "DejaVuSans-Bold": "DejaVuSans-Bold.ttf",
+        "DejaVuSans-Oblique": "DejaVuSans-Oblique.ttf",
+    }
+    font_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts")
+    if not all(os.path.exists(os.path.join(font_dir, fn)) for fn in FONT_SRC.values()):
+        return
+    try:
+        for name, fn in FONT_SRC.items():
+            pdfmetrics.registerFont(TTFont(name, os.path.join(font_dir, fn)))
+    except Exception:  # pragma: no cover - only when a bundled font is corrupt
+        return
+    # Keep <b>/<i> inline markup working inside Paragraphs.
+    addMapping("DejaVuSans", 0, 0, "DejaVuSans")
+    addMapping("DejaVuSans", 1, 0, "DejaVuSans-Bold")
+    addMapping("DejaVuSans", 0, 1, "DejaVuSans-Oblique")
+    addMapping("DejaVuSans", 1, 1, "DejaVuSans-Bold")
+    registerFontFamily(
+        "DejaVuSans",
+        normal="DejaVuSans",
+        bold="DejaVuSans-Bold",
+        italic="DejaVuSans-Oblique",
+        boldItalic="DejaVuSans-Bold",
+    )
+    # reportlab's Paragraph resolver (ps2tt) maps a font name to family/bold/
+    # italic through a fixed table of built-ins. Register our DejaVu family in
+    # that table so styles using "DejaVuSans*" parse correctly.
+    from reportlab.lib import fonts as _rl_fonts
+
+    _rl_fonts._ps2tt_map.update(
+        {
+            "dejavusans": ("DejaVuSans", 0, 0),
+            "dejavusans-bold": ("DejaVuSans", 1, 0),
+            "dejavusans-oblique": ("DejaVuSans", 0, 1),
+        }
+    )
+
+
+_register_fonts()
+
+# Characters the bundled DejaVu font cannot draw or that are colour emoji.
+# Stripping them keeps the report clean instead of printing empty boxes.
+_EMOJI_RE = re.compile(
+    "["
+    "\U0001F000-\U0001FAFF"  # Mahjong tiles ... Symbols & pictographs extended-A
+    "\U0001FB00-\U0001FBFF"  # Symbols for legacy computing
+    "\u20E3"                 # combining enclosing keycap
+    "\u200D"                 # zero-width joiner
+    "\uFE00-\uFE0F"          # variation selectors (emoji presentation)
+    "\uE000-\uF8FF"          # private-use area (icon fonts)
+    "\u2B50"                 # white medium star (colour emoji, not in DejaVu)
+    "]+"
+)
+
+# Glyph coverage of the bundled DejaVu font, for stripping any character that
+# would otherwise render as an empty box. Tested lazily against the TTFont so
+# we don't hard-code hundreds of code points.
+_dejavu_cmap = None
+
+
+def _missing_glyph_re() -> "re.Pattern":
+    """Return a regex matching chars missing from the bundled DejaVu font.
+
+    Only characters from the ranges commonly emitted by LLMs (arrows, symbols,
+    dingbats, currency, CJK punctuation) are examined, so the regex stays compact
+    and the cache is bounded.
+    """
+    global _dejavu_cmap
+    if _dejavu_cmap is None:
+        try:
+            from reportlab.pdfbase.ttfonts import TTFont
+
+            _dejavu_cmap = TTFont(
+                "_Probe", os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts", "DejaVuSans.ttf")
+            ).face.charToGlyph
+        except Exception:
+            _dejavu_cmap = {}
+    ranges = (
+        "\u2000-\u2BFF"  # general punctuation... misc symbols (≈, →, ✓, ✅ …)
+        "\u20A0-\u20CF"  # currency symbols (₹, ₽ …)
+        "\u2600-\u27BF"  # misc symbols + dingbats
+        "\u2C00-\u2DFF"  # glagolitic + coptic
+        "\u2E00-\u2E7F"  # supplemental punctuation
+        "\u2E80-\u2FFF"  # CJK radicals
+    )
+    missing = "".join(
+        ch
+        for cp in range(0x2000, 0x3001)
+        if (ch := chr(cp)).isprintable() and not _dejavu_cmap.get(cp)
+    )
+    if not missing:
+        return re.compile(r"(?!)")  # never matches
+    return re.compile("[" + re.escape(missing) + "]")
+
+
+def _sanitize_text(value) -> str:
+    """Return a string safe for PDF rendering (no emoji / unusable glyphs)."""
+    if value is None:
+        return " "
+    text = str(value)
+    text = _EMOJI_RE.sub(" ", text)
+    text = _missing_glyph_re().sub(" ", text)
+    # Fold repeated spaces left after stripping.
+    return re.sub(r" {2,}", " ", text)
+
 
 # Brand palette (matches the web UI).
 INDIGO = colors.HexColor("#4f46e5")
@@ -42,12 +164,12 @@ APP_NAME = "StartupLaunch AI"
 def _s(value, default: str = "N/A") -> str:
     if value is None:
         return default
-    return str(value).strip() or default
+    return _sanitize_text(value).strip() or default
 
 
 def _list(value) -> list:
     if isinstance(value, list):
-        return [str(x).strip() for x in value if str(x).strip()]
+        return [_sanitize_text(x).strip() for x in value if _sanitize_text(x).strip()]
     if isinstance(value, str):
         return [s.strip() for s in re.split(r"[\n•,]", value) if s.strip()]
     return []
@@ -106,46 +228,46 @@ def _extract_sections(content: dict) -> dict:
 def _section_title(text: str) -> Paragraph:
     style = ParagraphStyle(
         name="SectionTitle",
-        fontName="Helvetica-Bold",
+        fontName="DejaVuSans-Bold",
         fontSize=13,
         leading=16,
         textColor=INDIGO,
         spaceBefore=14,
         spaceAfter=6,
     )
-    return Paragraph(text.upper(), style)
+    return Paragraph(_sanitize_text(text).upper(), style)
 
 
 def _label(text: str) -> Paragraph:
     style = ParagraphStyle(
         name="FieldLabel",
-        fontName="Helvetica-Bold",
+        fontName="DejaVuSans-Bold",
         fontSize=9.5,
         leading=12,
         textColor=GRAY,
         spaceBefore=6,
         spaceAfter=1,
     )
-    return Paragraph(text.upper(), style)
+    return Paragraph(_sanitize_text(text).upper(), style)
 
 
 def _body(text: str) -> Paragraph:
     style = ParagraphStyle(
         name="Body",
-        fontName="Helvetica",
+        fontName="DejaVuSans",
         fontSize=10,
         leading=15,
         textColor=DARK,
         alignment=TA_JUSTIFY,
         spaceAfter=4,
     )
-    return Paragraph(text or "N/A", style)
+    return Paragraph(_sanitize_text(text) or "N/A", style)
 
 
 def _bullet(text: str) -> Paragraph:
     style = ParagraphStyle(
         name="Bullet",
-        fontName="Helvetica",
+        fontName="DejaVuSans",
         fontSize=10,
         leading=14,
         textColor=DARK,
@@ -153,7 +275,7 @@ def _bullet(text: str) -> Paragraph:
         bulletIndent=0,
         spaceAfter=3,
     )
-    return Paragraph(text, style, bulletText="•")
+    return Paragraph(_sanitize_text(text), style, bulletText="•")
 
 
 def _sources_block(sources) -> list:
@@ -165,7 +287,7 @@ def _sources_block(sources) -> list:
         "SOURCES (LIVE WEB RESEARCH)",
         ParagraphStyle(
             name="SourceLabel",
-            fontName="Helvetica-Bold",
+            fontName="DejaVuSans-Bold",
             fontSize=8.5,
             leading=11,
             textColor=GRAY,
@@ -175,7 +297,7 @@ def _sources_block(sources) -> list:
     )
     style = ParagraphStyle(
         name="Source",
-        fontName="Helvetica",
+        fontName="DejaVuSans",
         fontSize=8.5,
         leading=11,
         textColor=GRAY,
@@ -187,7 +309,7 @@ def _sources_block(sources) -> list:
         if not isinstance(s, dict):
             continue
         url = _s(s.get("url"))
-        title = str(s.get("title") or "").strip() or url
+        title = _sanitize_text(s.get("title")).strip() or url
         links.append(Paragraph(
             f'<link href="{url}"><font color="#4f46e5">{title}</font></link>',
             style,
@@ -199,12 +321,12 @@ def _tag_table(items: list, tag_color=INDIGO) -> Flowable:
     """Row of rounded-pill style tags, wrapped in an invisible table."""
     if not items:
         return Paragraph("No data available.", ParagraphStyle(
-            name="Empty", fontName="Helvetica-Oblique", fontSize=9.5,
+            name="Empty", fontName="DejaVuSans-Oblique", fontSize=9.5,
             leading=13, textColor=GRAY,
         ))
     cell_style = ParagraphStyle(
         name="Tag",
-        fontName="Helvetica-Bold",
+        fontName="DejaVuSans-Bold",
         fontSize=9,
         leading=11,
         textColor=tag_color,
@@ -249,14 +371,14 @@ def _verdict_banner(recommendation: str) -> Flowable:
 
     text_style = ParagraphStyle(
         name="VerdictText",
-        fontName="Helvetica-Bold",
+        fontName="DejaVuSans-Bold",
         fontSize=16,
         leading=20,
         textColor=colors.white,
     )
     label_style = ParagraphStyle(
         name="VerdictLabel",
-        fontName="Helvetica",
+        fontName="DejaVuSans",
         fontSize=9,
         leading=12,
         textColor=colors.white,
@@ -300,7 +422,7 @@ class _FooterCanvas:
             canvas.saveState()
             canvas.translate(x, y)
             canvas.rotate(28)
-            canvas.setFont("Helvetica-Bold", 26)
+            canvas.setFont("DejaVuSans-Bold", 26)
             canvas.setFillColor(INDIGO)
             canvas.setFillAlpha(0.10)
             canvas.drawCentredString(0, 0, WATERMARK_TEXT)
@@ -310,7 +432,7 @@ class _FooterCanvas:
         canvas.setStrokeColor(colors.HexColor("#e5e7eb"))
         canvas.setLineWidth(0.6)
         canvas.line(18 * mm, 14 * mm, A4[0] - 18 * mm, 14 * mm)
-        canvas.setFont("Helvetica", 8)
+        canvas.setFont("DejaVuSans", 8)
         canvas.setFillColor(GRAY)
         canvas.drawString(18 * mm, 10 * mm, f"{APP_NAME} · {self._title}")
         canvas.drawRightString(A4[0] - 18 * mm, 10 * mm, f"Page {doc.page}")
@@ -339,14 +461,14 @@ def build_report_pdf(project: Project, report: Report) -> bytes:
 
     heading = ParagraphStyle(
         name="Title",
-        fontName="Helvetica-Bold",
+        fontName="DejaVuSans-Bold",
         fontSize=24,
         leading=28,
         textColor=DARK,
     )
     subtitle = ParagraphStyle(
         name="Subtitle",
-        fontName="Helvetica",
+        fontName="DejaVuSans",
         fontSize=11,
         leading=16,
         textColor=GRAY,
@@ -354,14 +476,14 @@ def build_report_pdf(project: Project, report: Report) -> bytes:
     )
     meta = ParagraphStyle(
         name="Meta",
-        fontName="Helvetica-Bold",
+        fontName="DejaVuSans-Bold",
         fontSize=9.5,
         leading=14,
         textColor=DARK,
     )
     small = ParagraphStyle(
         name="Small",
-        fontName="Helvetica",
+        fontName="DejaVuSans",
         fontSize=9,
         leading=13,
         textColor=GRAY,
@@ -370,7 +492,7 @@ def build_report_pdf(project: Project, report: Report) -> bytes:
     story = []
 
     # ── Cover / header block ──────────────────────────────────────────────
-    story.append(Paragraph(project.title, heading))
+    story.append(Paragraph(_sanitize_text(project.title), heading))
     story.append(Spacer(1, 4))
     story.append(Paragraph(_s(project.description, ""), subtitle))
     story.append(Spacer(1, 10))
@@ -403,7 +525,7 @@ def build_report_pdf(project: Project, report: Report) -> bytes:
             "complete. Missing sections are shown as 'No data available'.",
             ParagraphStyle(
                 name="PartialNote",
-                fontName="Helvetica-Oblique",
+                fontName="DejaVuSans-Oblique",
                 fontSize=9.5,
                 leading=13,
                 textColor=AMBER,
@@ -420,11 +542,11 @@ def build_report_pdf(project: Project, report: Report) -> bytes:
 
     market_size = market.get("market_size") if isinstance(market.get("market_size"), dict) else {}
     tam_cell = ParagraphStyle(
-        name="TamLabel", fontName="Helvetica-Bold", fontSize=9.5, leading=13,
+        name="TamLabel", fontName="DejaVuSans-Bold", fontSize=9.5, leading=13,
         alignment=TA_CENTER,
     )
     tam_value = ParagraphStyle(
-        name="TamValue", fontName="Helvetica-Bold", fontSize=14, leading=17,
+        name="TamValue", fontName="DejaVuSans-Bold", fontSize=14, leading=17,
         textColor=DARK, alignment=TA_CENTER,
     )
     tam_table = Table(
