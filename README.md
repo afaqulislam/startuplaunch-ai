@@ -82,7 +82,7 @@ Most founders validate ideas with gut feel, biased friends, or expensive consult
 It is a full-stack web application (Next.js + FastAPI monorepo) that:
 
 - Accepts a startup idea (title, description, target audience, industry).
-- Dispatches **three specialized AI agents in parallel** — Market Research, Competitor Analysis, Risk Assessment — powered by Groq's `llama-3.3-70b-versatile`.
+- Dispatches **three specialized AI agents in parallel** — Market Research, Competitor Analysis, Risk Assessment — powered by Groq's `openai/gpt-oss-120b`.
 - Synthesizes their findings with a fourth **Executive Decision agent** into a **Go / No-Go / Pivot** recommendation.
 - Persists everything as a structured, tabbed report with **PDF export**, all behind secure authentication.
 
@@ -157,7 +157,7 @@ The full request lifecycle:
 
 ## The Agent Swarm ![The Agent Swarm](https://img.shields.io/badge/The%20Agent%20Swarm-8b5cf6?style=flat-square&logo=network&logoColor=white)
 
-A lightweight orchestration layer fans an idea out to **three specialists running in parallel**, then a fourth agent synthesizes everything into an executive decision — powered by Groq's `llama-3.3-70b-versatile` with **enforced structured JSON output**.
+A lightweight orchestration layer fans an idea out to **three specialists running in parallel**, then a fourth agent synthesizes everything into an executive decision — powered by Groq's `openai/gpt-oss-120b` with **enforced structured JSON output**.
 
 Every specialist analyzes from its own knowledge and reasoning; uncertain figures are explicitly labeled as estimates, so the report never presents guessed numbers as fact.
 
@@ -298,7 +298,7 @@ reportlab (server-side PDF export)</span>
 </td>
 <td width="33%" align="center" style="background:#f8fafc;border-radius:12px;padding:16px">
 <b>AI Runtime</b><br><span style="color:#6b7280;font-size:13px">
-Groq · llama-3.3-70b-versatile<br>
+Groq · openai/gpt-oss-120b<br>
 OpenAI SDK · enforced JSON output (Groq endpoint)<br>
 Fast parallel agent swarm<br>
 Redis-backed rate limiting (optional)<br>
@@ -423,7 +423,7 @@ Open <http://localhost:3000>, register an account, and launch your first validat
 | -------------- | :------: | ---------------------------------------- | ---------------------------------------------------- |
 | `SECRET_KEY`   | **Yes**  | —                                        | JWT signing secret. API refuses to start without it. |
 | `GROQ_API_KEY` | **Yes**  | —                                        | Groq API key for the agent swarm.                    |
-| `GROQ_MODEL`   |    No    | `llama-3.3-70b-versatile`                | Agent model. Supports enforced JSON output. The `groq/compound` / `groq/compound-mini` models enable built-in web search but can hit intermittent 413 "Request Entity Too Large" errors on Groq's free tier. |
+| `GROQ_MODEL`   |    No    | `openai/gpt-oss-120b`                | Agent model. Supports enforced JSON output. The `groq/compound` / `groq/compound-mini` models enable built-in web search but can hit intermittent 413 "Request Entity Too Large" errors on Groq's free tier. |
 | `DATABASE_URL` |    No    | `sqlite+aiosqlite:///./startuplaunch.db` | Async DB URL — use Postgres/Neon in production.      |
 | `CORS_ORIGINS` |    No    | `http://localhost:3000`                  | Comma-separated allowed frontend origins.            |
 | `REDIS_URL`    |    No    | —                                        | Redis connection string; enables Redis-backed rate limiting (multi-worker). Use `redis://` for plain TCP, `rediss://` for TLS. |
@@ -597,7 +597,7 @@ Covered behaviors include:
 - **Projects**: full lifecycle, atomic run claiming, stale-run recovery sweeps, pagination validation, cross-user access denial, **server-side search & status filtering**, **failed-run marking**, and **per-user analyze rate limiting**.
 - **Reports**: ownership enforcement (403), 404 handling, auth requirement, and **server-side PDF export** (valid PDF bytes, correct content-type, download filename, and cross-user 403 on the `/pdf` endpoint).
 - **Orchestrator**: full 4-section report shape (three specialists + executive verdict), failure propagation from any agent.
-- **Agents**: strict JSON extraction (markdown fences rejected, missing/invalid JSON raises), and default model check (`llama-3.3-70b-versatile`).
+- **Agents**: strict JSON extraction (markdown fences rejected, missing/invalid JSON raises), and default model check (`openai/gpt-oss-120b`).
 
 ### Frontend — quality gates
 
@@ -712,12 +712,12 @@ You describe your idea, and the orchestrator dispatches three specialist agents 
 
 <details>
 <summary><b>Does this work with live web search?</b></summary>
-Live web search is off by default. The default model (`llama-3.3-70b-versatile`) answers from its own knowledge with uncertain figures labeled as estimates. You can opt into Groq's built-in web search by setting `GROQ_MODEL=groq/compound-mini`, but note the compound models can hit intermittent 413 "Request Entity Too Large" errors on Groq's free tier.
+Live web search is off by default. The default model (`openai/gpt-oss-120b`) answers from its own knowledge with uncertain figures labeled as estimates. You can opt into Groq's built-in web search by setting `GROQ_MODEL=groq/compound-mini`, but note the compound models can hit intermittent 413 "Request Entity Too Large" errors on Groq's free tier.
 </details>
 
 <details>
 <summary><b>Which LLM powers the agents?</b></summary>
-The swarm runs on Groq's `llama-3.3-70b-versatile` (enforced JSON output), accessed through the OpenAI SDK pointed at Groq's OpenAI-compatible endpoint. Set `GROQ_MODEL` to switch models — e.g. `groq/compound-mini` opts into live web search. Model and instructions are configurable in `backend/agents/base.py` and `backend/agents/specialized.py`.
+The swarm runs on Groq's `openai/gpt-oss-120b` (enforced JSON output), accessed through the OpenAI SDK pointed at Groq's OpenAI-compatible endpoint. Set `GROQ_MODEL` to switch models — e.g. `groq/compound-mini` opts into live web search. Model and instructions are configurable in `backend/agents/base.py` and `backend/agents/specialized.py`.
 </details>
 
 <details>

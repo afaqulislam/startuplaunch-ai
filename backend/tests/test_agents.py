@@ -36,4 +36,4 @@ def test_extract_json_object_invalid_json_raises():
 
 
 def test_base_agent_default_model():
-    assert BaseAgent("Test", "instructions").model == "llama-3.3-70b-versatile"
+    assert BaseAgent("Test", "instructions").model == "openai/gpt-oss-120b"

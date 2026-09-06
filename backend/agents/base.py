@@ -26,7 +26,7 @@ def _extract_json_object(content: str) -> dict:
 
 
 class BaseAgent:
-    def __init__(self, name: str, instructions: str, model: str = "llama-3.3-70b-versatile"):
+    def __init__(self, name: str, instructions: str, model: str = "openai/gpt-oss-120b"):
         self.name = name
         self.instructions = instructions
         self.model = model
