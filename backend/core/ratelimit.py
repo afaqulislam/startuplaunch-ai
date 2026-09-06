@@ -88,17 +88,28 @@ class RedisRateLimiter(RateLimiter):
         return f"{self.KEY_PREFIX}:{self.max_requests}:{self.window_seconds}:{key}"
 
     async def is_allowed(self, key: str) -> bool:
-        rkey = self._rkey(key)
-        now = time.time()
-        window_start = now - self.window_seconds
-        member = f"{now:.6f}:{uuid.uuid4().hex}"
-        pipe = self._client.pipeline()
-        pipe.zremrangebyscore(rkey, 0, window_start)
-        pipe.zadd(rkey, {member: now})
-        pipe.zcard(rkey)
-        pipe.expire(rkey, self.window_seconds)
-        results = await pipe.execute()
-        return results[2] <= self.max_requests
+        try:
+            rkey = self._rkey(key)
+            now = time.time()
+            window_start = now - self.window_seconds
+            member = f"{now:.6f}:{uuid.uuid4().hex}"
+            pipe = self._client.pipeline()
+            pipe.zremrangebyscore(rkey, 0, window_start)
+            pipe.zadd(rkey, {member: now})
+            pipe.zcard(rkey)
+            pipe.expire(rkey, self.window_seconds)
+            results = await pipe.execute()
+            return results[2] <= self.max_requests
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(
+                "Redis rate limiter unavailable (%s: %s); allowing request.",
+                type(e).__name__,
+                str(e)[:120],
+            )
+            # Fail open: rate limiting is best-effort. If Redis is down the
+            # whole server should still serve requests rather than crash.
+            return True
 
     async def clear(self) -> None:
         async for key in self._client.scan_iter(f"{self.KEY_PREFIX}:*"):

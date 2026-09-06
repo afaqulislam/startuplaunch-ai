@@ -243,7 +243,7 @@ Every specialist analyzes from its own knowledge and reasoning; uncertain figure
 <b>PDF export</b><br>Professional, branded, device-independent PDF generated server-side (reportlab) — no browser print dialog.
 </td>
 <td width="50%" style="border-left:4px solid #ef4444;padding:12px 16px;background:#fffafa;border-radius:8px">
-<b>Crash-safe workflow</b><br>Stuck runs auto-recover after 10 minutes; each swarm run caps at 300 seconds.
+<b>Crash-safe workflow</b><br>Stuck runs auto-recover after 10 minutes; each swarm run caps at 120 seconds.
 </td>
 </tr>
 <tr>
