@@ -27,14 +27,12 @@ export interface MarketAnalysis {
     som?: string | number
   }
   trends?: string[]
-  _sources?: SourceRef[]
 }
 
 export interface CompetitorAnalysis {
   direct_competitors?: string[]
   indirect_competitors?: string[]
   differentiators?: string[]
-  _sources?: SourceRef[]
 }
 
 export interface RiskAnalysis {
@@ -42,12 +40,6 @@ export interface RiskAnalysis {
   market_risks?: string[]
   execution_risks?: string[]
   mitigation_strategies?: string[]
-  _sources?: SourceRef[]
-}
-
-export interface SourceRef {
-  title?: string
-  url: string
 }
 
 export interface ExecutiveDecision {
@@ -89,13 +81,30 @@ export interface User {
   created_at: string
 }
 
+// The JWT is kept in module-scope memory only (never localStorage, so an XSS
+// payload can't exfiltrate it). The HttpOnly session cookie set by the backend
+// is the source of truth across reloads; when this in-memory token is present
+// it is also sent as the Authorization header for API/SSR-friendliness.
+let memoryToken: string | null = null
+
 export function getToken(): string | null {
-  if (typeof window === "undefined") return null
-  return localStorage.getItem("token")
+  return memoryToken
 }
 
-export function clearToken(): void {
-  localStorage.removeItem("token")
+export function setToken(token: string): void {
+  memoryToken = token
+}
+
+export async function clearToken(): Promise<void> {
+  // The token itself is gone from memory immediately; the HttpOnly cookie can
+  // only be cleared by the backend, so issue a best-effort logout. Failures are
+  // irrelevant here — the cookie expires with the JWT anyway.
+  memoryToken = null
+  try {
+    await fetch(`${API_BASE_URL}/api/auth/logout`, { method: "POST", credentials: "include" })
+  } catch {
+    // network error during logout is fine, session cookie still expires
+  }
 }
 
 // SQLite returns naive datetimes like "2026-08-07 12:34:56" (no timezone and a
@@ -131,10 +140,14 @@ export async function apiFetch<T = unknown>(
   const token = getToken()
   if (token) headers.set("Authorization", `Bearer ${token}`)
 
-  const res = await fetch(`${API_BASE_URL}${path}`, { ...options, headers })
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers,
+    credentials: "include",
+  })
 
   if (res.status === 401) {
-    clearToken()
+    await clearToken()
   }
 
   if (!res.ok) {

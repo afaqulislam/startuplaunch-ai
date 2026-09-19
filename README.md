@@ -11,14 +11,14 @@ Validate your startup idea in minutes with a swarm of specialized AI agents that
 <br>
 
 <div style="background:#0b1020;border-radius:14px;padding:12px 24px;color:#a5b4fc;font-size:14px">
-<b>Next.js 16</b> &nbsp;·&nbsp; <b>React 19</b> &nbsp;·&nbsp; <b>TypeScript 5</b> &nbsp;·&nbsp; <b>Tailwind CSS v4</b> &nbsp;·&nbsp; <b>FastAPI</b> &nbsp;·&nbsp; <b>Groq Llama 3.3</b> &nbsp;·&nbsp; <b>PostgreSQL / SQLite</b>
+<b>Next.js 16</b> &nbsp;·&nbsp; <b>React 19</b> &nbsp;·&nbsp; <b>TypeScript 5</b> &nbsp;·&nbsp; <b>Tailwind CSS v4</b> &nbsp;·&nbsp; <b>FastAPI</b> &nbsp;·&nbsp; <b>Groq · openai/gpt-oss-120b</b> &nbsp;·&nbsp; <b>PostgreSQL / SQLite</b>
 </div>
 
 <br>
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs&logoColor=white&style=for-the-badge)](https://nextjs.org) [![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white&style=for-the-badge)](https://react.dev) [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white&style=for-the-badge)](https://www.typescriptlang.org) [![Tailwind](https://img.shields.io/badge/Tailwind%20CSS-4-38bdf8?logo=tailwindcss&logoColor=white&style=for-the-badge)](https://tailwindcss.com)
 
-[![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white&style=for-the-badge)](https://fastapi.tiangolo.com) [![Python](https://img.shields.io/badge/Python-3.10+-3776ab?logo=python&logoColor=white&style=for-the-badge)](https://www.python.org) [![Groq](https://img.shields.io/badge/Groq%20Llama%203.3-f55036?style=for-the-badge)](https://groq.com) [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white&style=for-the-badge)](https://fastapi.tiangolo.com) [![Python](https://img.shields.io/badge/Python-3.12+-3776ab?logo=python&logoColor=white&style=for-the-badge)](https://www.python.org) [![Groq](https://img.shields.io/badge/Groq%20openai/gpt-oss-120b-f55036?style=for-the-badge)](https://groq.com) [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
 <br>
 
@@ -60,7 +60,7 @@ Validate your startup idea in minutes with a swarm of specialized AI agents that
     - [Report Schema](#report-schema)
 - [Data Model](#data-model)
 - [Testing & Quality](#testing--quality)
-    - [Backend — pytest (41 tests)](#backend--pytest-41-tests)
+    - [Backend — pytest (49 tests)](#backend--pytest-49-tests)
     - [Frontend — quality gates](#frontend--quality-gates)
 - [Performance & Reliability](#performance--reliability)
 - [Deployment](#deployment)
@@ -248,7 +248,7 @@ Every specialist analyzes from its own knowledge and reasoning; uncertain figure
 </tr>
 <tr>
 <td width="50%" style="border-left:4px solid #64748b;padding:12px 16px;background:#f8fafc;border-radius:8px">
-<b>Secure authentication</b><br>bcrypt hashing, JWT sessions, and **token revocation** — changing your password kills every outstanding session at once.
+<b>Secure authentication</b><br>bcrypt hashing, HttpOnly-cookie JWT sessions, and **token revocation** — changing your password kills every outstanding session at once.
 </td>
 <td width="50%" style="border-left:4px solid #0ea5e9;padding:12px 16px;background:#f7fcff;border-radius:8px">
 <b>Hardened by default</b><br>CSP + security headers on both tiers, fail-closed secrets, owner-scoped queries, sliding-window rate limiting.
@@ -320,15 +320,15 @@ startuplaunch-ai/
 │   │   ├── specialized.py         # Market · Competitor · Risk agents
 │   │   └── executive.py           # Go / No-Go / Pivot decision agent
 │   ├── api/
-│   │   ├── deps.py                # JWT auth dependency + token-version revocation check
-│   │   └── routers/               # auth.py · projects.py · reports.py
+│   │   ├── deps.py                # JWT auth dependency (header or HttpOnly cookie) + token-version revocation + role checks
+│   │   └── routers/               # auth.py (incl. logout) · projects.py · reports.py
 │   ├── core/
-│   │   ├── security.py            # JWT + bcrypt, fail-closed SECRET_KEY
+│   │   ├── security.py            # JWT + bcrypt + session-cookie settings, fail-closed SECRET_KEY
 │   │   └── ratelimit.py           # Sliding-window limiter (in-memory or Redis)
 │   ├── services/workflow.py       # Background analysis workflow (report persistence)
 │   ├── services/pdf_export.py     # Server-side professional PDF generation (reportlab)
-│   ├── alembic/                   # DB migrations (initial · analysis_started_at · token_version)
-│   ├── tests/                     # 41 pytest tests (auth · projects · reports · orchestrator · agents)
+│   ├── alembic/                   # DB migrations (initial · analysis_started_at · token_version · user role)
+│   ├── tests/                     # 49 pytest tests (auth · projects · reports · orchestrator · agents · rbac · cookie)
 │   ├── database.py                # Async engine + session factory + SQLite FK pragma
 │   ├── models.py                  # User / Project / Report ORM models
 │   ├── schemas.py                 # Pydantic models + input validation constraints
@@ -427,6 +427,8 @@ Open <http://localhost:3000>, register an account, and launch your first validat
 | `DATABASE_URL` |    No    | `sqlite+aiosqlite:///./startuplaunch.db` | Async DB URL — use Postgres/Neon in production.      |
 | `CORS_ORIGINS` |    No    | `http://localhost:3000`                  | Comma-separated allowed frontend origins.            |
 | `REDIS_URL`    |    No    | —                                        | Redis connection string; enables Redis-backed rate limiting (multi-worker). Use `redis://` for plain TCP, `rediss://` for TLS. |
+| `ADMIN_EMAILS` |    No    | —                                        | Comma-separated emails promoted to the `admin` role on startup (case-insensitive). |
+| `COOKIE_SECURE`|    No    | off                                      | Set to `true` in production to send the session cookie with `Secure` + `SameSite=None`. |
 
 > **Note:** a bare `postgresql://` URL is automatically upgraded to the `asyncpg` driver and libpq-only query params (`sslmode`, `channel_binding`) are stripped, so Neon/RDS connection strings work as-is.
 
@@ -445,13 +447,14 @@ Open <http://localhost:3000>, register an account, and launch your first validat
 
 ### Endpoints
 
-> All endpoints except `register`, `login` and `/` require an `Authorization: Bearer <token>` header.
+> All endpoints except `register`, `login`, `logout` and `/` authenticate via an `Authorization: Bearer <token>` header **or** the HttpOnly `access_token` session cookie set at login. Cookie-authenticated state-changing requests (POST/PUT/PATCH/DELETE) are additionally checked for a matching `Origin` header (CSRF), except when a Bearer token is supplied in the header.
 
 | Method   | Endpoint                     | Description                                                        |
 | -------- | ---------------------------- | ------------------------------------------------------------------ |
 | `GET`    | `/`                          | API health / welcome                                               |
 | `POST`   | `/api/auth/register`         | Create an account (email + password, 8–72 chars)                   |
-| `POST`   | `/api/auth/login`            | OAuth2 form login → returns JWT `access_token`                     |
+| `POST`   | `/api/auth/login`            | OAuth2 form login → returns JWT `access_token` **and sets an HttpOnly session cookie** |
+| `POST`   | `/api/auth/logout`           | Clear the session cookie (idempotent, no auth required)            |
 | `POST`   | `/api/auth/change-password`  | Change password; **revokes all outstanding sessions**              |
 | `POST`   | `/api/projects/`             | Create a project (title, description, target_audience?, industry?) |
 | `GET`    | `/api/projects/`             | List the current user's projects — search & filter server-side     |
@@ -569,13 +572,14 @@ users ──1── N── projects ──1── 1── reports
  hashed_password   description        content (JSON)
  token_version     target_audience    executive_summary
  is_active         industry           pdf_url
- created_at        status             created_at
-                   analysis_started_at
+ role              status             created_at
+ created_at        analysis_started_at
                    user_id (FK, CASCADE)
 ```
 
 - `users.email` is stored lowercased; lookups are case-insensitive.
 - `users.token_version` is incremented on password change — every JWT embeds the version at issue time, so older tokens are instantly rejected.
+- `users.role` defaults to `user`; emails listed in `ADMIN_EMAILS` are promoted to `admin` at startup (idempotent). Roles are embedded in JWTs and enforced by the `require_role` dependency.
 - `projects.status` cycles `pending → analyzing → completed | failed`.
 - Deleting a project cascades to its report (ORM and DB-level `ON DELETE CASCADE`).
 
@@ -583,12 +587,12 @@ users ──1── N── projects ──1── 1── reports
 
 ## Testing & Quality ![Testing & Quality](https://img.shields.io/badge/Testing%20%26%20Quality-22c55e?style=flat-square&logo=flask&logoColor=white)
 
-### Backend — pytest (41 tests)
+### Backend — pytest (49 tests)
 
 ```bash
 cd backend
 venv\Scripts\python.exe -m pytest tests -q
-# 41 passed — auth (10) · projects (10) · reports (6) · orchestrator (4) · agents (11)
+# 49 passed — auth (10) · projects (10) · reports (6) · orchestrator (3) · agents (7) · rbac (7) · cookie-auth (6)
 ```
 
 Covered behaviors include:
@@ -598,6 +602,8 @@ Covered behaviors include:
 - **Reports**: ownership enforcement (403), 404 handling, auth requirement, and **server-side PDF export** (valid PDF bytes, correct content-type, download filename, and cross-user 403 on the `/pdf` endpoint).
 - **Orchestrator**: full 4-section report shape (three specialists + executive verdict), failure propagation from any agent.
 - **Agents**: strict JSON extraction (markdown fences rejected, missing/invalid JSON raises), and default model check (`openai/gpt-oss-120b`).
+- **RBAC**: default `user` role on registration, role embedded in JWT claims, admin promotion via `ADMIN_EMAILS`, and `require_role` enforcement (403 for the wrong role).
+- **Cookie auth**: HttpOnly session cookie set on login, cookie-only requests authenticate, CSRF Origin-check on cookie-authenticated unsafe requests, and logout clearing the session.
 
 ### Frontend — quality gates
 
@@ -605,10 +611,11 @@ Covered behaviors include:
 cd frontend
 npx tsc --noEmit      # typecheck
 npm run lint          # ESLint
+npm run test          # Vitest (21 tests)
 npm run build         # production build
 ```
 
-All three gates are green in CI-style local runs (zero TypeScript errors, zero lint errors, successful production build).
+All four gates are green in CI-style local runs (zero TypeScript errors, zero lint errors, 21 passing Vitest tests, successful production build).
 
 ---
 
@@ -620,7 +627,7 @@ All three gates are green in CI-style local runs (zero TypeScript errors, zero l
 | Stuck-run recovery   | Runs stuck in `analyzing` are swept to `failed` after **10 minutes** at startup and before re-analysis — safe to re-dispatch. |
 | Double-dispatch      | Runs are claimed with a single atomic `UPDATE`; concurrent requests return 400. |
 | Polling              | Dashboard polls every **4 seconds** while any run is `analyzing`.          |
-| Transient failures   | No silent retries — an agent failure fails the run and the project is marked `failed`, so rate limits are visible instead of hidden. |
+| Transient failures   | No application-level retries; the OpenAI SDK's built-in retry (default `max_retries=2`) automatically resends transient/429 errors, honoring the server-reported wait. If an agent still errors, the run is failed and never fabricates a report. |
 | Failed runs          | A failed run marks the project `failed` (never a fabricated report); re-dispatch anytime to retry. |
 | LLM spend control    | Swarm dispatch is rate-limited to 5 runs / 15 minutes per user.            |
 
@@ -675,10 +682,12 @@ Three migrations are provided: the initial schema, `analysis_started_at`, and `t
 | ---------------- | ------------------------------------------------------------------------------------- |
 | Secrets          | Fail-closed — `SECRET_KEY` and `GROQ_API_KEY` never ship with defaults. The API refuses to start without `SECRET_KEY`. |
 | Passwords        | bcrypt hashing with 72-byte enforcement; 8-char minimum, 72-char maximum policy.       |
-| Sessions         | JWT (HS256) with 7-day expiry; server only trusts signed tokens.                       |
+| Sessions         | JWT (HS256) with 7-day expiry; server only trusts signed tokens.                      |
 | Revocation       | `token_version` claim — a password change bumps the version and instantly invalidates every previously-issued token. |
 | Brute-force      | Sliding-window rate limiting — 10/15 min per IP, 5/15 min per email (register & login), 5/15 min per user (analyze). |
-| Authorization    | Owner-scoped queries — every project/report filtered by the authenticated user; cross-user access returns 403/404. |
+| Authorization    | Owner-scoped queries — every project/report filtered by the authenticated user; cross-user access returns 403/404. Role-based access via `require_role` (e.g. `admin`-only endpoints). |
+| Token storage    | JWTs are delivered in an HttpOnly cookie (`access_token`, 7-day, `SameSite=Lax` in dev / `Secure` + `SameSite=None` when `COOKIE_SECURE=true`) instead of `localStorage`, mitigating XSS token theft. |
+| CSRF            | Cookie-authenticated state-changing requests (POST/PUT/PATCH/DELETE) must send a matching `Origin` header, except when a `Bearer` token is supplied; `login`, `register` and `logout` are exempt as entry/exit points. |
 | Headers (API)    | `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`. |
 | Headers (web)    | Strict CSP (`default-src 'self'`, no `object-src`, `frame-ancestors 'none'`, scoped `connect-src`) + `nosniff` + `X-Frame-Options` + `Referrer-Policy`. |
 | Input validation | Pydantic constraints — title ≤120, description ≤4000, search ≤200, blank/whitespace rejected, payloads trimmed. |
@@ -695,6 +704,8 @@ Three migrations are provided: the initial schema, `analysis_started_at`, and `t
 |   Done   | Server-side search & status filtering on the dashboard  |
 |   Done   | Token revocation via password change                    |
 |   Done   | CSP + security headers on both tiers                    |
+|   Done   | HttpOnly-cookie sessions with Origin-based CSRF guard   |
+|   Done   | Role-based access control (roles, `ADMIN_EMAILS`, `require_role`) |
 |   Next    | Docker Compose one-command local setup                   |
 |   Next    | Report history / diffing across re-analyses             |
 |  Planned | Industry-specific agent tuning and custom agent builder |
@@ -752,7 +763,7 @@ Yes. Authentication is required, and every project and report query is scoped to
 
 <details>
 <summary><b>Why do I get 429 / rate-limit errors during analysis?</b></summary>
-The free Groq tier allows a limited number of tokens per minute (TPM). Running several analyses back-to-back can exhaust that minute's budget. The swarm handles this gracefully: all Groq calls are serialized through one gate, and on a 429 the exact wait time Groq reports is honored before retrying — so a run completes on the first free minute instead of failing. Waiting ~30-60 seconds before re-running also helps on the free tier.
+The free Groq tier allows a limited number of tokens per minute (TPM). Running several analyses back-to-back can exhaust that minute's budget. The swarm handles this gracefully: all Groq calls are serialized through one gate, and retries are handled by the OpenAI SDK's built-in policy (default `max_retries=2`), which honors the exact wait time Groq reports on a 429 before resending — so a run completes on the first free minute instead of failing right away. The application code never retries on its own, so if a call still errors after the SDK's bounded retries, the run is marked `failed` rather than fabricating a report. Waiting ~30-60 seconds before re-running also helps on the free tier.
 </details>
 
 <details>
@@ -784,8 +795,8 @@ Contributions are welcome and appreciated. To contribute:
 Please keep the quality gates green before submitting:
 
 ```bash
-cd backend && python -m pytest tests -q     # all 41 tests pass
-cd frontend && npx tsc --noEmit && npm run lint
+cd backend && python -m pytest tests -q           # all 49 tests pass
+cd frontend && npx tsc --noEmit && npm run lint && npm run test
 ```
 
 Report bugs and request features via [GitHub Issues](https://github.com/afaqulislam/startuplaunch-ai/issues).

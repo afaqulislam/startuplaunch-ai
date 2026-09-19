@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { apiFetch, type AuthResponse } from "@/lib/api"
+import { apiFetch, setToken, type AuthResponse } from "@/lib/api"
 import { BrainCircuit, ArrowRight, Lock, Mail, Sparkles } from "lucide-react"
 
 export default function LoginPage() {
@@ -36,7 +36,7 @@ export default function LoginPage() {
         body: formData,
       })
 
-      localStorage.setItem("token", data.access_token)
+      setToken(data.access_token)
       router.push("/dashboard")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to log in.")

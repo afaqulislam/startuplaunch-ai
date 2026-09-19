@@ -45,9 +45,11 @@ def client():
 
 
 @pytest.fixture(autouse=True)
-def _reset_rate_limits():
+def _reset_rate_limits(client):
     """The rate limiter (in-memory or Redis) is process-global; reset it between
-    tests so each test starts from a clean slate."""
+    tests so each test starts from a clean slate. The session-scoped TestClient
+    also stores the HttpOnly session cookie from login responses, so clear the
+    jar before and after each test to keep tests independent."""
     import asyncio
 
     from core.ratelimit import (
@@ -66,7 +68,9 @@ def _reset_rate_limits():
         analyze_limiter,
     ):
         asyncio.run(limiter.clear())
+    client.cookies.clear()
     yield
+    client.cookies.clear()
 
 
 @pytest.fixture

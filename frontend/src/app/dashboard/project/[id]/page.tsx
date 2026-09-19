@@ -18,7 +18,6 @@ import {
   type MarketAnalysis,
   type CompetitorAnalysis,
   type RiskAnalysis,
-  type SourceRef,
 } from "@/lib/api"
 import { 
   ArrowLeft, 
@@ -40,7 +39,6 @@ import {
   Target,
   Check,
   RefreshCw,
-  ExternalLink
 } from "lucide-react"
 
 // ── Helper components ────────────────────────────────────────────────────────
@@ -95,29 +93,6 @@ function normalizeTakeaways(value: unknown): string[] {
   return []
 }
 
-function SourcesList({ sources }: { sources?: SourceRef[] }) {
-  if (!sources || sources.length === 0) return null
-  return (
-    <div className="pt-4 border-t border-border space-y-2">
-      <SectionLabel label="Sources — Live Web Research" />
-      <div className="flex flex-wrap gap-2">
-        {sources.map((s, i) => (
-          <a
-            key={i}
-            href={s.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-300 font-medium glass-panel px-3 py-1.5 rounded-full border border-indigo-500/30 hover:bg-indigo-500/10 transition-colors max-w-full"
-          >
-            <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">{s.title || s.url}</span>
-          </a>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 function MarketTab({ data }: { data?: MarketAnalysis | null }) {
   if (!data) return <p className="text-muted-foreground">No market data available.</p>
   return (
@@ -154,7 +129,6 @@ function MarketTab({ data }: { data?: MarketAnalysis | null }) {
           </div>
         </div>
       )}
-      <SourcesList sources={data._sources} />
     </div>
   )
 }
@@ -175,7 +149,6 @@ function CompetitorTab({ data }: { data?: CompetitorAnalysis | null }) {
         <SectionLabel label="Your Unfair Differentiators & Moat" />
         <TagList items={data.differentiators} color="emerald" />
       </div>
-      <SourcesList sources={data._sources} />
     </div>
   )
 }
@@ -212,7 +185,6 @@ function RiskTab({ data }: { data?: RiskAnalysis | null }) {
           </div>
         </div>
       )}
-      <SourcesList sources={data._sources} />
     </div>
   )
 }
@@ -232,12 +204,6 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
   const [actionError, setActionError] = useState("")
 
   const fetchProject = useCallback(async () => {
-    const token = getToken()
-    if (!token) {
-      router.push("/login")
-      return
-    }
-
     try {
       const data = await apiFetch<Project>(`/api/projects/${id}`)
       setProject(data)
@@ -274,9 +240,6 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
   }, [project?.status, fetchProject])
 
   const handleAnalyze = async () => {
-    const token = getToken()
-    if (!token) return
-
     const previousStatus = project?.status ?? "pending"
     setProject(prev => prev ? { ...prev, status: "analyzing" } : prev)
 
@@ -293,14 +256,19 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
   }
 
   const handleExportPdf = async () => {
-    const token = getToken()
-    if (!token || !project?.report?.id) return
+    if (!project?.report?.id) return
 
     try {
       // The backend generates a professional, device-independent PDF; the
       // browser only saves the bytes (no print dialog / web-page snapshot).
+      // The session cookie (sent via credentials) authenticates the download
+      // even after a reload when only the cookie survives in memory.
+      const headers = new Headers()
+      const token = getToken()
+      if (token) headers.set("Authorization", `Bearer ${token}`)
       const res = await fetch(`${API_BASE_URL}/api/reports/${project.report.id}/pdf`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers,
+        credentials: "include",
       })
       if (res.status === 401) {
         clearToken()
@@ -332,9 +300,6 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
   }
 
   const handleConfirmDelete = async () => {
-    const token = getToken()
-    if (!token) return
-
     try {
       await apiFetch(`/api/projects/${id}`, { method: "DELETE" })
       router.push("/dashboard")

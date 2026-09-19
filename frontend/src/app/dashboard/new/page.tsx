@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { apiFetch, getToken, type Project } from "@/lib/api"
+import { apiFetch, type Project } from "@/lib/api"
 import { ArrowLeft, Sparkles, Zap, CheckCircle2, Rocket } from "lucide-react"
 
 export default function NewProjectPage() {
@@ -32,12 +32,6 @@ export default function NewProjectPage() {
     e.preventDefault()
     setError("")
     setLoading(true)
-
-    const token = getToken()
-    if (!token) {
-      router.push("/login")
-      return
-    }
 
     try {
       // 1. Create project

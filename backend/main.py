@@ -15,11 +15,13 @@ from datetime import datetime, timezone, timedelta
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy import update, or_, text, inspect as sa_inspect
 
 from api.routers import auth, projects, reports
+from core.security import ACCESS_TOKEN_COOKIE_NAME
 from database import engine, Base, SessionLocal, _is_sqlite
-from models import Project
+from models import Project, User
 
 logger = logging.getLogger(__name__)
 
@@ -76,14 +78,60 @@ async def _ensure_token_version_column() -> None:
         logger.exception("Failed to apply token_version schema compatibility")
 
 
+async def _ensure_role_column() -> None:
+    """Dev-only schema compatibility.
+
+    Mirrors _ensure_token_version_column for the role column so databases
+    created before RBAC do not crash on the first query that selects role."
+    """
+    try:
+        async with engine.begin() as conn:
+            columns = await conn.run_sync(
+                lambda sync_conn: {
+                    col["name"] for col in sa_inspect(sync_conn).get_columns("users")
+                }
+            )
+            if "role" not in columns:
+                await conn.execute(
+                    text("ALTER TABLE users ADD COLUMN role VARCHAR NOT NULL DEFAULT 'user'")
+                )
+                logger.info("Added missing 'role' column to users table")
+    except Exception:
+        logger.exception("Failed to apply role schema compatibility")
+
+
+async def _promote_admins() -> None:
+    """Promote existing users listed in ADMIN_EMAILS (comma-separated) to the
+    admin role at startup. Config-driven and idempotent; users not listed are
+    left untouched."""
+    emails = [
+        email.strip().lower() for email in os.environ.get("ADMIN_EMAILS", "").split(",") if email.strip()
+    ]
+    if not emails:
+        return
+    try:
+        async with SessionLocal() as db:
+            result = await db.execute(
+                update(User).where(User.email.in_(emails)).values(role="admin")
+            )
+            if result.rowcount:
+                logger.info("Promoted %d user(s) to admin via ADMIN_EMAILS", result.rowcount)
+            await db.commit()
+    except Exception:
+        logger.exception("Failed to promote admins via ADMIN_EMAILS")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # In a real production app, use Alembic migrations instead of create_all.
     # For initial dev setup, we'll auto-create tables.
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    # Keep dev databases from the pre-token_version era working.
+    # Keep dev databases from the pre-token_version/pre-role era working.
     await _ensure_token_version_column()
+    await _ensure_role_column()
+    # Apply admin promotions configured via ADMIN_EMAILS.
+    await _promote_admins()
     # Self-heal any runs left "analyzing" by an unclean shutdown.
     await _recover_stuck_runs()
     yield
@@ -113,6 +161,34 @@ async def add_security_headers(request, call_next):
     response.headers.setdefault("X-Frame-Options", "DENY")
     response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
     return response
+
+
+UNSAFE_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
+# Credential-based, unauthenticated auth flows are exempt from the Origin
+# check: they either don't rely on the session cookie (register/login set it
+# fresh) or only clear it (logout). change-password stays protected because it
+# is an authenticated state-changing call.
+CSRF_EXEMPT_PATHS = {"/api/auth/login", "/api/auth/register", "/api/auth/logout"}
+
+
+@app.middleware("http")
+async def csrf_origin_check(request, call_next):
+    # CSRF defence for cookie-authenticated sessions: an unsafe request that
+    # carries the session cookie AND relies on it (no Authorization header)
+    # must come from one of the allowed frontend origins. SameSite=Lax already
+    # stops cross-site cookie sending in modern browsers; the Origin check also
+    # covers older clients. Header-authenticated requests never fall under this
+    # check even if a cookie happens to be present.
+    if (
+        request.method in UNSAFE_METHODS
+        and "authorization" not in request.headers
+        and ACCESS_TOKEN_COOKIE_NAME in request.cookies
+        and request.url.path not in CSRF_EXEMPT_PATHS
+    ):
+        origin = request.headers.get("origin")
+        if origin is None or origin not in cors_origins:
+            return JSONResponse({"detail": "Invalid request origin"}, status_code=403)
+    return await call_next(request)
 
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])

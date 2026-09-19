@@ -1,5 +1,6 @@
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
@@ -77,10 +78,40 @@ async def login(
 
     access_token_expires = timedelta(minutes=security.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
-        data={"sub": user.email, "ver": user.token_version},
+        data={"sub": user.email, "ver": user.token_version, "role": user.role},
         expires_delta=access_token_expires,
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    # Keep the JSON token (Authorization-header clients rely on it) and also
+    # set an HttpOnly cookie so browser sessions survive reloads without ever
+    # touching localStorage.
+    response = JSONResponse({"access_token": access_token, "token_type": "bearer"})
+    response.set_cookie(
+        key=security.ACCESS_TOKEN_COOKIE_NAME,
+        value=access_token,
+        max_age=security.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        httponly=True,
+        secure=security.COOKIE_SECURE,
+        samesite=security.COOKIE_SAMESITE,
+        path="/",
+    )
+    return response
+
+
+@router.post("/logout")
+async def logout():
+    # Clears the HttpOnly session cookie. Requires no authentication so a
+    # left-over client-side token can always be revoked that way; the JWT
+    # itself expires on its own and is additionally revocable via password
+    # change (token_version).
+    response = JSONResponse({"message": "Logged out"})
+    response.delete_cookie(
+        key=security.ACCESS_TOKEN_COOKIE_NAME,
+        httponly=True,
+        secure=security.COOKIE_SECURE,
+        samesite=security.COOKIE_SAMESITE,
+        path="/",
+    )
+    return response
 
 
 @router.post("/change-password")

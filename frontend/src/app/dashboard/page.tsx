@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ConfirmDialog } from "@/components/confirm-dialog"
-import { apiFetch, getToken, clearToken, ApiError, formatDate, type Project } from "@/lib/api"
+import { apiFetch, clearToken, ApiError, formatDate, type Project } from "@/lib/api"
 import { 
   Plus, 
   Target, 
@@ -66,12 +66,6 @@ export default function Dashboard() {
   const pageRef = useRef(0)
 
   const loadProjects = useCallback(async (reset = false) => {
-    const token = getToken()
-    if (!token) {
-      router.push("/login")
-      return
-    }
-
     const nextSkip = reset ? 0 : pageRef.current
     try {
       const query = buildProjectsQuery(nextSkip, debouncedQuery, selectedStatus)
@@ -132,8 +126,6 @@ export default function Dashboard() {
 
   const handleAnalyze = async (projectId: number, e: React.MouseEvent) => {
     e.stopPropagation()
-    const token = getToken()
-    if (!token) return
 
     const previousStatus = projects.find(p => p.id === projectId)?.status ?? "pending"
     setProjects(prev => prev.map(p => p.id === projectId ? { ...p, status: "analyzing" } : p))
@@ -157,9 +149,6 @@ export default function Dashboard() {
 
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return
-
-    const token = getToken()
-    if (!token) return
 
     try {
       await apiFetch(`/api/projects/${deleteTarget.id}`, { method: "DELETE" })

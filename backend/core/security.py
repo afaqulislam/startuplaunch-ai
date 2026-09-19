@@ -18,6 +18,17 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 1 week
 MIN_PASSWORD_LENGTH = 8
 
+# HttpOnly session cookie used to authenticate browser clients alongside the
+# Authorization header (the JSON response still carries the token so SPA and
+# API clients work unchanged). Cookies shield the token from XSS in
+# localStorage. When the frontend and API live on different origins (e.g.
+# Vercel app vs Railway API), the cookie must be SameSite=None + Secure to be
+# shipped cross-site; locally localhost<->localhost uses Lax, which also blocks
+# cross-site sending. Set COOKIE_SECURE=1 in production environments.
+ACCESS_TOKEN_COOKIE_NAME = "access_token"
+COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "") != ""
+COOKIE_SAMESITE = "none" if COOKIE_SECURE else "lax"
+
 
 def verify_password(plain_password, hashed_password):
     password_bytes = plain_password.encode('utf-8')[:72]

@@ -14,6 +14,10 @@ class User(Base):
     # Tokens embed this number; get_current_user rejects tokens whose version
     # is older than the user's current one.
     token_version = Column(Integer, default=0, nullable=False)
+    # Role-based access control: "user" (default) or "admin". The role is
+    # embedded in JWTs and enforced by require_role() dependencies. Admins are
+    # promoted via the ADMIN_EMAILS env var at startup.
+    role = Column(String, default="user", nullable=False, server_default="user")
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

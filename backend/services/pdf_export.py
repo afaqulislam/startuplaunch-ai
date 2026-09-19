@@ -278,45 +278,6 @@ def _bullet(text: str) -> Paragraph:
     return Paragraph(_sanitize_text(text), style, bulletText="•")
 
 
-def _sources_block(sources) -> list:
-    """Clickable citations from the live web research performed by the agents,
-    so claims in the report can be traced back to a real source."""
-    if not sources:
-        return []
-    label = Paragraph(
-        "SOURCES (LIVE WEB RESEARCH)",
-        ParagraphStyle(
-            name="SourceLabel",
-            fontName="DejaVuSans-Bold",
-            fontSize=8.5,
-            leading=11,
-            textColor=GRAY,
-            spaceBefore=6,
-            spaceAfter=1,
-        ),
-    )
-    style = ParagraphStyle(
-        name="Source",
-        fontName="DejaVuSans",
-        fontSize=8.5,
-        leading=11,
-        textColor=GRAY,
-        leftIndent=10,
-        spaceAfter=1,
-    )
-    links = []
-    for s in sources:
-        if not isinstance(s, dict):
-            continue
-        url = _s(s.get("url"))
-        title = _sanitize_text(s.get("title")).strip() or url
-        links.append(Paragraph(
-            f'<link href="{url}"><font color="#4f46e5">{title}</font></link>',
-            style,
-        ))
-    return [label, *links]
-
-
 def _tag_table(items: list, tag_color=INDIGO) -> Flowable:
     """Row of rounded-pill style tags, wrapped in an invisible table."""
     if not items:
@@ -576,7 +537,6 @@ def build_report_pdf(project: Project, report: Report) -> bytes:
         story.append(_label("Industry Growth Trends"))
         for trend in _list(market.get("trends")):
             story.append(_bullet(trend))
-    story.extend(_sources_block(market.get("_sources")))
 
     # ── Competitor analysis ───────────────────────────────────────────────
     story.append(KeepTogether([
@@ -588,7 +548,6 @@ def build_report_pdf(project: Project, report: Report) -> bytes:
         _label("Unfair Differentiators & Moat"),
         _tag_table(_list(competitor.get("differentiators")), tag_color=EMERALD),
     ]))
-    story.extend(_sources_block(competitor.get("_sources")))
 
     # ── Risk assessment ───────────────────────────────────────────────────
     story.append(_section_title("Risk Assessment"))
@@ -602,7 +561,6 @@ def build_report_pdf(project: Project, report: Report) -> bytes:
         story.append(_label("Mitigation Strategy Roadmap"))
         for strat in _list(risk.get("mitigation_strategies")):
             story.append(_bullet(strat))
-    story.extend(_sources_block(risk.get("_sources")))
 
     doc.build(
         story,
