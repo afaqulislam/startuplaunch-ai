@@ -18,7 +18,7 @@ export default function LandingDemo() {
           Sample report preview
         </div>
 
-        <div className="bg-card rounded-[20px] p-5 sm:p-6 border border-border/50">
+        <div className="bg-card rounded-[20px] p-5 sm:p-6 sm:pt-10 border border-border/50">
           {/* Window chrome */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-5 border-b border-border gap-4">
             <div className="flex items-center gap-3">
