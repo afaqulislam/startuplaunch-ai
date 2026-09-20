@@ -4,7 +4,7 @@
 
 # <span style="color:#6366f1">StartupLaunch AI</span>
 
-### Autonomous AI Agent Swarms — Instant Startup Idea Validation
+### Autonomous AI Agent Swarms — Instant Startup Idea Validation    
 
 Validate your startup idea in minutes with a swarm of specialized AI agents that run market research, competitor analysis and risk assessment **in parallel** — then deliver a single, evidence-backed **Go / No-Go / Pivot** verdict.
 
