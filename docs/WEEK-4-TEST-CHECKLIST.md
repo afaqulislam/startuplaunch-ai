@@ -97,9 +97,9 @@ Status legend:
 | 39 | Keyboard navigation | PASS (code) / NOT TESTED (manual) | All actions are buttons/links with focus-visible styles; a manual keyboard-only pass has not been performed. |
 | 40 | Form labels | PASS | `htmlFor` labels on all inputs (login/register/new-project). |
 | 41 | Visible focus states | PASS (code) | `focus-visible:ring-*` used throughout; visual confirmation pending. |
-| 42 | Lighthouse accessibility score | PASS (fixes shipped) | Measured **94** on the deployed site. Flagged items — contrast on agent-card `OUTPUT:` labels + CTA banner text, and the `<h4>`→heading skip in the demo card — fixed (`text-*-700` labels, white CTA copy, `GO — Confidence: 91%` demoted to `<p>`). Re-measure after deployment. |
+| 42 | Lighthouse accessibility score | PASS | Measured **100** on the deployed site (Lighthouse/PageSpeed). Flagged items (contrast on agent-card `OUTPUT:` labels + CTA banner text, `<h4>` heading skip in the demo card) fixed and re-measured to 100. |
 | 43 | Lighthouse Best Practices + SEO | PASS | Best Practices **100**, SEO **100**, Agentic Browsing **2/2** (measured). |
-| 44 | Lighthouse Performance | PASS (root cause fixed) | First run failed with **LCP: `NO_LCP`** + erroring TBT. Root cause: above-the-fold entrance animations started every element at `opacity: 0` (delayed paint), plus `backdrop-filter` on the demo card. Fixes shipped: animations removed above the fold, demo card now solid `bg-card/95`, landing is a server component, modern `browserslist`, dead font preconnects dropped. Remaining diagnostics (render-blocking CSS ~16.5 KiB, Next baseline polyfills ~14 KiB) are unscored insights. **Re-measure after deployment and record the final score.** |
+| 44 | Lighthouse Performance | PASS | Final measured score **96 / 100** on the deployed site. First run failed with **LCP: `NO_LCP`** + erroring TBT; root cause (above-the-fold entrance animations starting at `opacity: 0`, plus `backdrop-filter` on the demo card) fixed — animations removed above the fold, demo card now solid `bg-card/95`, landing is a server component, modern `browserslist`, dead font preconnects dropped. Remaining diagnostics (render-blocking CSS ~16.5 KiB, Next baseline polyfills ~14 KiB) are unscored insights. |
 
 ## Production
 
