@@ -33,7 +33,7 @@ Filename pattern: `01-landing.png`, `02-login.png`, … (see table below). Use d
 | 18 | `18-mobile-report.png` | report page at 375×667 | Tabs + verdict render on mobile | Responsive UI |
 | 19 | `19-deployed-terminal.png` | deployment dashboard | CI pipeline green + deployed domain | CI/CD, deployment |
 
-Add if desired: `20-lighthouse.png` after running Lighthouse on the deployed site (Performance/Accessibility/Best Practices/SEO) — then paste the scores into the final report §21 and the checklist row 42.
+Add if desired: `20-lighthouse.png` after running Lighthouse on the deployed site (Performance/Accessibility/Best Practices/SEO) — then paste the scores into the final report §21 and the checklist row 42. Lighthouse results may also be committed as a PDF (see `startuplaunch-ai-lighthouse.pdf` in `docs/screenshots/`).
 
 ---
 
