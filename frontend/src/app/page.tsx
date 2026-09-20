@@ -47,7 +47,7 @@ export default function LandingPage() {
           <div className="max-w-6xl mx-auto flex flex-col items-center text-center space-y-8">
             
             {/* Status Badge */}
-            <div className="animate-slide-up stagger-1 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/25 text-xs font-semibold tracking-wider backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/25 text-xs font-semibold tracking-wider backdrop-blur-md">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 [animation-duration:1500ms] motion-reduce:animate-none" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -57,7 +57,7 @@ export default function LandingPage() {
             </div>
 
             {/* Main Headline */}
-            <h1 className="animate-slide-up stagger-2 text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold tracking-tight max-w-5xl leading-[1.05] text-foreground">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold tracking-tight max-w-5xl leading-[1.05] text-foreground">
               Validate ideas with{" "}
               <span className="gradient-text">Autonomous</span>{" "}
               <br className="hidden sm:block" />
@@ -65,12 +65,12 @@ export default function LandingPage() {
             </h1>
 
             {/* Subtitle */}
-            <p className="animate-slide-up stagger-3 max-w-2xl text-lg sm:text-xl text-foreground/70 dark:text-foreground/80 leading-relaxed font-normal">
+            <p className="max-w-2xl text-lg sm:text-xl text-foreground/70 dark:text-foreground/80 leading-relaxed font-normal">
               Stop building in the dark. Dispatch four specialized AI agents to deliver instant market research, competitor matrices, risk simulations, and executive verdicts — typically in under a minute.
             </p>
 
             {/* Hero CTAs */}
-            <div className="animate-slide-up stagger-4 flex flex-col sm:flex-row gap-4 pt-2 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-4 pt-2 w-full sm:w-auto">
               <Link href="/register">
                 <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl shadow-2xl shadow-indigo-500/40 dark:shadow-indigo-400/25 border-0 transition-all duration-300 hover:scale-105 hover:shadow-indigo-400/40 group">
                   <Sparkles className="w-5 h-5 mr-2 group-hover:animate-pulse-subtle" />
@@ -86,7 +86,7 @@ export default function LandingPage() {
             </div>
 
             {/* Trust Indicators */}
-            <div className="animate-slide-up stagger-5 flex flex-wrap justify-center items-center gap-x-8 gap-y-3 pt-4 text-xs text-muted-foreground">
+            <div className="flex flex-wrap justify-center items-center gap-x-8 gap-y-3 pt-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
                 <span>TAM / SAM / SOM in seconds</span>
@@ -142,7 +142,7 @@ export default function LandingPage() {
                 iconBg: "bg-indigo-500/10 border-indigo-500/25",
                 iconColor: "text-indigo-600 dark:text-indigo-400",
                 output: "Market Size & CAGR",
-                outputColor: "text-indigo-600 dark:text-indigo-300",
+                outputColor: "text-indigo-700 dark:text-indigo-300",
               },
               {
                 icon: TrendingUp,
@@ -152,7 +152,7 @@ export default function LandingPage() {
                 iconBg: "bg-cyan-500/10 border-cyan-500/25",
                 iconColor: "text-cyan-600 dark:text-cyan-400",
                 output: "Competitive Moat",
-                outputColor: "text-cyan-600 dark:text-cyan-300",
+                outputColor: "text-cyan-700 dark:text-cyan-300",
               },
               {
                 icon: ShieldAlert,
@@ -162,7 +162,7 @@ export default function LandingPage() {
                 iconBg: "bg-amber-500/10 border-amber-500/25",
                 iconColor: "text-amber-600 dark:text-amber-400",
                 output: "Risk Mitigations",
-                outputColor: "text-amber-600 dark:text-amber-300",
+                outputColor: "text-amber-700 dark:text-amber-300",
               },
               {
                 icon: Bot,
@@ -172,7 +172,7 @@ export default function LandingPage() {
                 iconBg: "bg-emerald-500/10 border-emerald-500/25",
                 iconColor: "text-emerald-600 dark:text-emerald-400",
                 output: "Final Recommendation",
-                outputColor: "text-emerald-600 dark:text-emerald-300",
+                outputColor: "text-emerald-700 dark:text-emerald-300",
               },
             ].map(({ icon: Icon, title, desc, border, iconBg, iconColor, output, outputColor }) => (
               <div key={title} className={`glass-panel glass-panel-hover glow-card-indigo rounded-2xl p-6 flex flex-col justify-between space-y-5 border ${border}`}>
@@ -196,13 +196,13 @@ export default function LandingPage() {
           <div className="p-10 sm:p-14 rounded-3xl bg-indigo-600 text-center space-y-6 relative overflow-hidden shadow-xl shadow-indigo-500/30">
             <div className="ambient-orb -top-20 left-1/2 -translate-x-1/2 w-80 h-80 bg-indigo-500/40 dark:bg-indigo-500/25" />
             <div className="relative z-10 space-y-2">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-200">Ready to validate?</p>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white">Ready to validate?</p>
               <h2 className="text-3xl sm:text-5xl font-extrabold text-white">
                 Your next big idea deserves{" "}
                 <span className="text-white underline decoration-indigo-300/50 underline-offset-4">clarity</span>.
               </h2>
             </div>
-            <p className="text-indigo-100/90 text-base sm:text-lg max-w-xl mx-auto relative z-10">
+            <p className="text-white text-base sm:text-lg max-w-xl mx-auto relative z-10">
               Join thousands of founders and investors validating startup ideas with AI precision before investing time and capital.
             </p>
             <div className="pt-4 relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4">

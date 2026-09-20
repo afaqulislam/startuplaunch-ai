@@ -173,12 +173,13 @@ All scoped to the authenticated owner (cross-user 403/404), verified by tests.
 - 120-second swarm cap; 10-minute stale-run sweep; no polling when idle (polling only while `analyzing`).
 - Runtime switches to Redis rate limiting for multi-worker deployments.
 - Bundled fonts and minimal bundled assets; no large images in the frontend.
+- **Frontend load-path tuning (final batch):** the landing page is a pure server component (client islands only: `landing-header`, `landing-demo`); above-the-fold entrance animations were removed so the Largest Contentful Paint element registers on first paint (Lighthouse was reporting `LCP: NO_LCP`); the demo card no longer uses `backdrop-filter` (solid `bg-card/95`); dead Google Fonts preconnects removed; modern `browserslist` targets set. Remaining Lighthouse diagnostics on the live build are unscored insights (render-blocking CSS ~16.5 KiB, Next runtime baseline polyfills ~14 KiB), not score drivers.
 
 ## 21. Accessibility
 
 - Semantic HTML, `<label htmlFor>` on all inputs, `aria-label`/`aria-pressed`/`aria-live` where meaningful, keyboard-usable buttons, focus-visible rings, color-coded statuses that are also labeled text, responsive layouts with reduced motion support (`motion-reduce`).
-- **Measured (Lighthouse/PageSpeed Insights, live site):** Accessibility **94** (remaining: contrast on some muted elements and one heading-order skip inside the demo card — fixable follow-ups). Best Practices **100**, SEO **100**, Agentic Browsing **2/2**.
-- Performance was failing on the first run (diagnostics: render-blocking requests, legacy JS ~14 KiB, optimize DOM size, long main-thread tasks) and has since had targeted optimizations applied (landing converted to a server component with client islands, legacy-JS removed via modern browser targets, dead font preconnects removed). The latest score is to be re-measured on the deployed site and recorded here.
+- **Measured (Lighthouse/PageSpeed Insights, live site):** Best Practices **100**, SEO **100**, Agentic Browsing **2/2**.
+- Accessibility measured **94** on the deployed build; the flagged items (contrast on the agent-card `OUTPUT:` labels and CTA banner text, plus one heading-order skip inside the demo card) have been fixed and are pending re-measurement on the deployed site.
 
 ## 22. Testing and QA
 
@@ -226,7 +227,7 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on push to `main` and PRs:
 - Full Task 1 coverage: responsive UI, authentication, RBAC, DB persistence, CRUD, search/filter, validation, secure API integration, error handling, polished UX.
 - Full Task 2 coverage: env config, secrets hygiene, server-side authorization, rate limiting, security headers/CSP, logging, performance-oriented queries, deployment documentation, test checklist.
 - **Measured locally:** 55 backend tests and 23 frontend tests pass; typecheck, lint and production build are clean.
-- **Measured on the deployed site:** Accessibility 94, Best Practices 100, SEO 100, Agentic Browsing 2/2 (Lighthouse/PageSpeed). Performance optimizations shipped (server-component landing, no legacy JS, dead preconnects removed); the final Performance score is to be re-measured after this batch is deployed.
+- **Measured on the deployed site:** Best Practices 100, SEO 100, Agentic Browsing 2/2 (Lighthouse/PageSpeed); Accessibility 94 with the flagged contrast + heading-order items fixed. First Performance run failed with `LCP: NO_LCP`; root-cause fixes shipped (above-the-fold entrance animations removed, demo-card `backdrop-filter` replaced with a solid surface, server-component landing, modern browser targets, dead preconnects dropped) and the final Performance score is pending re-measurement on the deployed site.
 
 ## 28. Limitations
 

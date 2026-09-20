@@ -10,8 +10,8 @@ export default function LandingDemo() {
   const [activeTab, setActiveTab] = useState<DemoTab>("executive")
 
   return (
-    <div id="demo" className="max-w-5xl mx-auto mt-20 lg:mt-28 animate-slide-up stagger-5">
-      <div className="glass-panel rounded-3xl p-1.5 shadow-2xl shadow-indigo-500/10 border border-indigo-500/15 relative">
+    <div id="demo" className="max-w-5xl mx-auto mt-20 lg:mt-28">
+      <div className="bg-card/95 rounded-3xl p-1.5 shadow-2xl shadow-indigo-500/10 border border-border/40 relative">
         {/* Glow lines */}
         <div className="absolute -top-px left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-indigo-500/60 to-transparent" />
         <div className="absolute top-3 right-3 z-10 rounded-full bg-foreground/5 border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
@@ -51,7 +51,7 @@ export default function LandingDemo() {
           {/* Tab Content */}
           <div className="pt-6 min-h-[200px]">
             {activeTab === "executive" && (
-              <div className="space-y-5 animate-fade-in">
+              <div className="space-y-5">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 gap-4">
                   <div className="flex items-center gap-4">
                     <div className="w-11 h-11 rounded-xl bg-emerald-500/20 flex items-center justify-center">
@@ -59,7 +59,7 @@ export default function LandingDemo() {
                     </div>
                     <div>
                       <p className="text-xs uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-bold mb-0.5">Executive Verdict</p>
-                      <h4 className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-300">GO — Confidence: 91%</h4>
+                      <p className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-300">GO — Confidence: 91%</p>
                     </div>
                   </div>
                   <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 px-3 py-1 text-xs font-semibold">Strong Market Fit</Badge>
