@@ -14,7 +14,7 @@ export default function LandingDemo() {
       <div className="bg-card/95 rounded-3xl p-1.5 shadow-2xl shadow-indigo-500/10 border border-border/40 relative">
         {/* Glow lines */}
         <div className="absolute -top-px left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-indigo-500/60 to-transparent" />
-        <div className="absolute top-3 right-3 z-10 rounded-full bg-foreground/5 border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <div className="w-fit mb-3 sm:mb-0 sm:absolute sm:top-3 sm:right-3 z-10 rounded-full bg-foreground/5 border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
           Sample report preview
         </div>
 
