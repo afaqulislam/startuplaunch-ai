@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import update, or_, text, inspect as sa_inspect
 
-from api.routers import auth, projects, reports
+from api.routers import auth, admin, projects, reports
 from core.security import ACCESS_TOKEN_COOKIE_NAME
 from database import engine, Base, SessionLocal, _is_sqlite
 from models import Project, User
@@ -192,6 +192,7 @@ async def csrf_origin_check(request, call_next):
 
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
+app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 app.include_router(projects.router, prefix="/api/projects", tags=["Projects"])
 app.include_router(reports.router, prefix="/api/reports", tags=["Reports"])
 

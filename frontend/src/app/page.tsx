@@ -160,7 +160,7 @@ export default function LandingPage() {
 
             {/* Subtitle */}
             <p className="animate-slide-up stagger-3 max-w-2xl text-lg sm:text-xl text-foreground/70 dark:text-foreground/80 leading-relaxed font-normal">
-              Stop building in the dark. Dispatch four specialized AI agents to deliver instant market research, competitor matrices, risk simulations, and executive verdicts — in under 20 seconds.
+              Stop building in the dark. Dispatch four specialized AI agents to deliver instant market research, competitor matrices, risk simulations, and executive verdicts — typically in under a minute.
             </p>
 
             {/* Hero CTAs */}
@@ -201,6 +201,9 @@ export default function LandingPage() {
             <div className="glass-panel rounded-3xl p-1.5 shadow-2xl shadow-indigo-500/10 border border-indigo-500/15 relative">
               {/* Glow lines */}
               <div className="absolute -top-px left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-indigo-500/60 to-transparent" />
+              <div className="absolute top-3 right-3 z-10 rounded-full bg-foreground/5 border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Sample report preview
+              </div>
               
               <div className="bg-card rounded-[20px] p-5 sm:p-6 border border-border/50">
                 {/* Window chrome */}
@@ -316,10 +319,10 @@ export default function LandingPage() {
         <section id="metrics" className="py-16 border-y border-border/60 bg-card/50 backdrop-blur-md">
           <div className="max-w-6xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { value: "14,200+", label: "Ideas Analyzed", color: "text-foreground" },
-              { value: "$4.8M", label: "R&D Dollars Saved", color: "text-indigo-600 dark:text-indigo-400" },
-              { value: "<20s", label: "Avg Swarm Speed", color: "text-cyan-600 dark:text-cyan-400" },
-              { value: "96%", label: "Precision Rate", color: "text-emerald-600 dark:text-emerald-400" },
+              { value: "4", label: "Agents — One Verdict", color: "text-foreground" },
+              { value: "120s", label: "Hard Swarm Cap Per Run", color: "text-indigo-600 dark:text-indigo-400" },
+              { value: "10min", label: "Stuck-Run Auto-Recovery", color: "text-cyan-600 dark:text-cyan-400" },
+              { value: "78", label: "Automated Tests in CI", color: "text-emerald-600 dark:text-emerald-400" },
             ].map((stat) => (
               <div key={stat.label} className="space-y-2">
                 <p className={`text-4xl lg:text-5xl font-extrabold ${stat.color}`}>{stat.value}</p>

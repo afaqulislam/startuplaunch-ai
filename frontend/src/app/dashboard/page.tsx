@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ConfirmDialog } from "@/components/confirm-dialog"
-import { apiFetch, clearToken, ApiError, formatDate, type Project } from "@/lib/api"
+import { apiFetch, clearToken, ApiError, formatDate, getCurrentUser, getAdminSummary, type Project, type User, type AdminSummary } from "@/lib/api"
 import { 
   Plus, 
   Target, 
@@ -22,7 +22,12 @@ import {
   BrainCircuit, 
   Search, 
   LogOut,
-  ChevronRight
+  ChevronRight,
+  ShieldCheck,
+  Users,
+  FolderKanban,
+  CheckCircle,
+  AlertTriangle
 } from "lucide-react"
 
 // Page size matches the API's max limit; "Load more" pages beyond the first
@@ -52,6 +57,25 @@ export default function Dashboard() {
   const [deleting, setDeleting] = useState(false)
   const [actionError, setActionError] = useState("")
   const [connectionError, setConnectionError] = useState(false)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [adminSummary, setAdminSummary] = useState<AdminSummary | null>(null)
+
+  // Load the authenticated user; exposes the role so admins get an admin-only
+  // panel. The API is still the enforcement boundary (admin endpoints 403 for
+  // regular users), so this is presentation only.
+  useEffect(() => {
+    getCurrentUser()
+      .then((user) => {
+        setCurrentUser(user)
+        if (user.role === "admin") {
+          return getAdminSummary().then(setAdminSummary)
+        }
+      })
+      .catch(() => {
+      // Session is invalid or backend unreachable; the project fetch handles
+      // the redirect/connection-error state below.
+      })
+  }, [])
 
   // Search is filtered server-side (so it composes with pagination), but we
   // debounce the keystrokes so every character doesn't fire a request.
@@ -231,6 +255,39 @@ export default function Dashboard() {
             </Button>
           </Link>
         </div>
+
+        {/* Admin Panel — only rendered for the 'admin' role (server-enforced) */}
+        {currentUser?.role === "admin" && adminSummary && (
+          <div className="glass-panel p-5 rounded-2xl border border-purple-500/25 bg-purple-500/5">
+            <div className="flex items-center gap-2 pb-3">
+              <ShieldCheck className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+              <span className="text-xs font-bold uppercase tracking-widest text-purple-600 dark:text-purple-300">
+                Admin Platform Summary
+              </span>
+              <Badge className="ml-auto bg-purple-500/15 text-purple-600 dark:text-purple-300 border border-purple-500/30 text-xs">
+                Admin
+              </Badge>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                <Users className="w-4 h-4 text-purple-500 dark:text-purple-400 shrink-0" />
+                <span><strong className="text-foreground">{adminSummary.users}</strong> total users</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                <FolderKanban className="w-4 h-4 text-purple-500 dark:text-purple-400 shrink-0" />
+                <span><strong className="text-foreground">{adminSummary.projects}</strong> total projects</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                <CheckCircle className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
+                <span><strong className="text-foreground">{adminSummary.projects_by_status.completed}</strong> completed</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                <AlertTriangle className="w-4 h-4 text-red-500 dark:text-red-400 shrink-0" />
+                <span><strong className="text-foreground">{adminSummary.projects_by_status.failed}</strong> failed</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Metrics Summary Banner */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

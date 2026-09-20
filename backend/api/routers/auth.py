@@ -97,6 +97,14 @@ async def login(
     return response
 
 
+@router.get("/me", response_model=schemas.UserResponse)
+async def read_current_user(current_user: models.User = Depends(deps.get_current_user)):
+    """Return the authenticated user (id, email, role, ...). The role value in
+    the response lets the frontend decide whether to show admin-only UI, but
+    authorization itself is always re-checked server-side by require_role()."""
+    return current_user
+
+
 @router.post("/logout")
 async def logout():
     # Clears the HttpOnly session cookie. Requires no authentication so a

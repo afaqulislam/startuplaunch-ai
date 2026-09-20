@@ -24,26 +24,33 @@ Validate your startup idea in minutes with a swarm of specialized AI agents that
 
 <table align="center">
 <tr>
-  <td align="center" width="25%" style="background:#eef2ff;border-radius:14px;padding:20px"><div style="font-size:26px;font-weight:800;color:#4338ca">14,200+</div><div style="color:#6b7280;font-size:13px">Ideas Analyzed</div></td>
-  <td align="center" width="25%" style="background:#ecfeff;border-radius:14px;padding:20px"><div style="font-size:26px;font-weight:800;color:#0e7490">&lt;20s</div><div style="color:#6b7280;font-size:13px">Typical Swarm Speed</div></td>
-  <td align="center" width="25%" style="background:#ecfdf5;border-radius:14px;padding:20px"><div style="font-size:26px;font-weight:800;color:#047857">96%</div><div style="color:#6b7280;font-size:13px">Precision Rate</div></td>
-  <td align="center" width="25%" style="background:#fef3c7;border-radius:14px;padding:20px"><div style="font-size:26px;font-weight:800;color:#b45309">4 Agents</div><div style="color:#6b7280;font-size:13px">One Verdict</div></td>
+  <td align="center" width="25%" style="background:#eef2ff;border-radius:14px;padding:20px"><div style="font-size:26px;font-weight:800;color:#4338ca">4 Agents</div><div style="color:#6b7280;font-size:13px">One Evidence-Backed Verdict</div></td>
+  <td align="center" width="25%" style="background:#ecfeff;border-radius:14px;padding:20px"><div style="font-size:26px;font-weight:800;color:#0e7490">120s</div><div style="color:#6b7280;font-size:13px">Hard Swarm Cap Per Run</div></td>
+  <td align="center" width="25%" style="background:#ecfdf5;border-radius:14px;padding:20px"><div style="font-size:26px;font-weight:800;color:#047857">10 min</div><div style="color:#6b7280;font-size:13px">Stuck-Run Auto-Recovery</div></td>
+  <td align="center" width="25%" style="background:#fef3c7;border-radius:14px;padding:20px"><div style="font-size:26px;font-weight:800;color:#b45309">78 Tests</div><div style="color:#6b7280;font-size:13px">Backend + Frontend (CI)</div></td>
 </tr>
 </table>
 
 </div>
+
+> **Live demo:** [https://startuplaunchai-aui.vercel.app](https://startuplaunchai-aui.vercel.app) · **Repository:** [github.com/afaqulislam/startuplaunch-ai](https://github.com/afaqulislam/startuplaunch-ai)
+>
+> **Week 4 final submission docs:** [Final Report](docs/WEEK-4-FINAL-REPORT.md) · [Test Checklist](docs/WEEK-4-TEST-CHECKLIST.md) · [Screenshot Guide](docs/WEEK-4-SCREENSHOT-GUIDE.md) · [Deployment Guide](docs/DEPLOYMENT.md)
 
 ---
 
 ## Table of Contents ![Table of Contents](https://img.shields.io/badge/Table%20of%20Contents-64748b?style=flat-square&logo=list&logoColor=white)
 
 - [What Is StartupLaunch AI?](#what-is-startuplaunch-ai)
+- [Problem Statement](#problem-statement)
+- [Solution](#solution)
 - [Why It Matters](#why-it-matters)
 - [How It Works](#how-it-works)
 - [The Agent Swarm](#the-agent-swarm)
 - [Key Features](#key-features)
 - [Use Cases](#use-cases)
 - [Tech Stack](#tech-stack)
+- [Architecture Overview](#architecture-overview)
 - [Repository Structure](#repository-structure)
 - [Quick Start](#quick-start)
     - [Prerequisites](#prerequisites)
@@ -59,16 +66,21 @@ Validate your startup idea in minutes with a swarm of specialized AI agents that
     - [End-to-End Example](#end-to-end-example-curl)
     - [Report Schema](#report-schema)
 - [Data Model](#data-model)
+- [CRUD Operations](#crud-operations)
+- [Role-Based Access Control (RBAC)](#role-based-access-control-rbac)
+- [Search & Filtering](#search--filtering)
 - [Testing & Quality](#testing--quality)
-    - [Backend — pytest (49 tests)](#backend--pytest-49-tests)
+    - [Backend — pytest (55 tests)](#backend--pytest-55-tests)
     - [Frontend — quality gates](#frontend--quality-gates)
+- [CI/CD](#cicd)
 - [Performance & Reliability](#performance--reliability)
 - [Deployment](#deployment)
     - [Frontend → Vercel](#frontend--vercel)
     - [Backend → Railway / Render / Fly.io](#backend--railway--render--flyio)
     - [Database Migrations](#database-migrations)
 - [Security](#security)
-- [Roadmap](#roadmap)
+- [Limitations](#limitations)
+- [Roadmap & Future Improvements](#roadmap--future-improvements)
 - [FAQ](#faq)
 - [Contributing](#contributing)
 - [Author & License](#author--license)
@@ -107,11 +119,33 @@ It is a full-stack web application (Next.js + FastAPI monorepo) that:
 
 ---
 
+## Problem Statement ![Problem Statement](https://img.shields.io/badge/Problem-ef4444?style=flat-square&logo=alert&logoColor=white)
+
+Most founders validate startup ideas with gut feel, biased friends, or expensive consultants. A structured research cycle — understanding the addressable market, mapping competitors, and stress-testing risks — takes weeks and can cost thousands in agency fees. As a result:
+
+- **Ideas are validated by opinion, not evidence** — biased friends and anecdotal feedback replace real market research.
+- **Research is slow and unscalable** — a single quality validation can take weeks of manual work.
+- **Analysis is unstructured** — findings live in scattered docs, notes and PDFs that are hard to compare or trust.
+- **Verdicts are gut-feel** — founders rarely get an evidence-backed Go / No-Go / Pivot decision before spending time and capital.
+
+## Solution ![Solution](https://img.shields.io/badge/Solution-10b981?style=flat-square&logo=rocket&logoColor=white)
+
+StartupLaunch AI is a production-style full-stack web application that automates the validation pipeline with a swarm of **four specialized AI agents** that run in parallel and synthesize an evidence-backed executive verdict:
+
+1. A founder submits an idea once (title, description, target audience, industry).
+2. **Market Research, Competitor Analysis and Risk Assessment agents** analyze the idea concurrently and return structured JSON.
+3. An **Executive Decision agent** synthesizes everything into a **Go / No-Go / Pivot** recommendation with an executive summary and key takeaways.
+4. Results persist as a structured, tabbed report behind secure auth, with **server-side PDF export** for sharing.
+
+Everything is authenticated, role-aware, rate-limited, and stored in a real database — a complete production-style backend and frontend rather than a single script.
+
+---
+
 ## Why It Matters ![Why It Matters](https://img.shields.io/badge/Why%20It%20Matters-f59e0b?style=flat-square&logo=zap&logoColor=white)
 
 <table>
 <tr>
-<td width="33%" align="center" style="background:#eef2ff;border-radius:12px;padding:16px"><b style="color:#4338ca">Speed</b><br><span style="color:#6b7280;font-size:13px">Most runs finish in under 20 seconds — a full research cycle, not a slide deck.</span></td>
+<td width="33%" align="center" style="background:#eef2ff;border-radius:12px;padding:16px"><b style="color:#4338ca">Speed</b><br><span style="color:#6b7280;font-size:13px">Most runs finish in under a minute — a full research cycle, not a slide deck.</span></td>
 <td width="33%" align="center" style="background:#ecfeff;border-radius:12px;padding:16px"><b style="color:#0e7490">Consistency</b><br><span style="color:#6b7280;font-size:13px">Every idea gets the same rigorous, structured analysis — no mood swings, no bias.</span></td>
 <td width="33%" align="center" style="background:#ecfdf5;border-radius:12px;padding:16px"><b style="color:#047857">Objectivity</b><br><span style="color:#6b7280;font-size:13px">Agents fail loudly rather than fabricate, so a completed report is trustworthy.</span></td>
 </tr>
@@ -309,6 +343,36 @@ SQLite (dev) · PostgreSQL / Neon (prod)</span>
 
 ---
 
+## Architecture Overview ![Architecture Overview](https://img.shields.io/badge/Architecture-6366f1?style=flat-square&logo=diagram&logoColor=white)
+
+A three-tier architecture: a statically-rendered Next.js frontend, an async FastAPI API, and a relational database, with the Groq LLM runtime consumed server-side only.
+
+```text
+┌──────────────────────┐        ┌─────────────────────────────┐        ┌─────────────────┐
+│   Next.js (App Router)│  HTTPS  │       FastAPI (async)        │  SQL   │   Database       │
+│   ────────────────── │<───────>│  ──────────────────────────  │<─────> │   ─────────────   │
+│  Landing page        │  JWT /  │  Auth (bcrypt + JWT + cookie)│        │  users           │
+│  Login / Register    │ HttpOnly│  Projects CRUD + search      │        │  projects        │
+│  Dashboard           │  cookie │  Reports + server-side PDF   │        │  reports         │
+│  Report viewer       │        │  Admin summary (RBAC)        │        │  (SQLite dev,     │
+│  Admin panel (badge) │        │  Rate limiting (Redis/InProc) │        │   Postgres prod)  │
+│  PDF download        │        │  Security headers + CORS     │        │                  │
+└──────────────────────┘        │  ──────────────────────────  │        └─────────────────┘
+                                │  AGENT SWARM (Groq)          │
+                                │  Market · Competitor · Risk  │
+                                │  → parallel → Executive      │
+                                └─────────────────────────────┘
+```
+
+**Key architectural decisions**
+
+- **Async first.** FastAPI + async SQLAlchemy / asyncpg / aiosqlite keep the whole request path non-blocking; the swarm itself runs as an asyncio task.
+- **Background analysis.** Analysis runs in a FastAPI `BackgroundTasks` workflow — the API responds immediately and the dashboard polls status until the run completes or fails.
+- **Server-side generation.** Search/filter/pagination and PDF export all happen on the backend so behavior is consistent and verifiable.
+- **Security at the API, not the UI.** JWT + HttpOnly session cookie, CSRF origin checks, owner-scoped queries and `require_role()` enforcement mean the frontend never acts as the only security layer.
+
+---
+
 ## Repository Structure ![Repository Structure](https://img.shields.io/badge/Repository%20Structure-94a3b8?style=flat-square&logo=folder&logoColor=white)
 
 ```text
@@ -321,14 +385,14 @@ startuplaunch-ai/
 │   │   └── executive.py           # Go / No-Go / Pivot decision agent
 │   ├── api/
 │   │   ├── deps.py                # JWT auth dependency (header or HttpOnly cookie) + token-version revocation + role checks
-│   │   └── routers/               # auth.py (incl. logout) · projects.py · reports.py
+│   │   └── routers/               # auth.py (incl. logout, /me) · admin.py (admin-only summary) · projects.py · reports.py
 │   ├── core/
 │   │   ├── security.py            # JWT + bcrypt + session-cookie settings, fail-closed SECRET_KEY
 │   │   └── ratelimit.py           # Sliding-window limiter (in-memory or Redis)
 │   ├── services/workflow.py       # Background analysis workflow (report persistence)
 │   ├── services/pdf_export.py     # Server-side professional PDF generation (reportlab)
 │   ├── alembic/                   # DB migrations (initial · analysis_started_at · token_version · user role)
-│   ├── tests/                     # 49 pytest tests (auth · projects · reports · orchestrator · agents · rbac · cookie)
+│   ├── tests/                     # 55 pytest tests (auth · projects · reports · orchestrator · agents · rbac · admin · cookie)
 │   ├── database.py                # Async engine + session factory + SQLite FK pragma
 │   ├── models.py                  # User / Project / Report ORM models
 │   ├── schemas.py                 # Pydantic models + input validation constraints
@@ -455,7 +519,9 @@ Open <http://localhost:3000>, register an account, and launch your first validat
 | `POST`   | `/api/auth/register`         | Create an account (email + password, 8–72 chars)                   |
 | `POST`   | `/api/auth/login`            | OAuth2 form login → returns JWT `access_token` **and sets an HttpOnly session cookie** |
 | `POST`   | `/api/auth/logout`           | Clear the session cookie (idempotent, no auth required)            |
+| `GET`    | `/api/auth/me`               | Current user profile incl. `role` (drives admin UI affordances)     |
 | `POST`   | `/api/auth/change-password`  | Change password; **revokes all outstanding sessions**              |
+| `GET`    | `/api/admin/summary`         | **Admin-only** platform counts (users, projects, statuses) — 403 for the `user` role |
 | `POST`   | `/api/projects/`             | Create a project (title, description, target_audience?, industry?) |
 | `GET`    | `/api/projects/`             | List the current user's projects — search & filter server-side     |
 | `GET`    | `/api/projects/{id}`         | Project detail including its report                                |
@@ -585,14 +651,45 @@ users ──1── N── projects ──1── 1── reports
 
 ---
 
+## CRUD Operations ![CRUD Operations](https://img.shields.io/badge/CRUD-84cc16?style=flat-square&logo=tasks&logoColor=white)
+
+The application implements a full authenticated CRUD workflow over the `projects` (and `reports`) resource:
+
+| Operation | Frontend | API |
+| --------- | -------- | --- |
+| **Create** | "New Startup Idea" form (`/dashboard/new`) submit → project created and the swarm auto-dispatched | `POST /api/projects/` |
+| **Read** | Dashboard lists the user's projects; report viewer opens a project detail (`/dashboard/project/[id]`) | `GET /api/projects/`, `GET /api/projects/{id}`, `GET /api/reports/{id}` |
+| **Update** | Re-analyze replaces the report on the existing project; report content is written by the workflow | `POST /api/projects/{id}/analyze`, `POST /api/auth/change-password` |
+| **Delete** | Trash icon → confirm dialog → row removed | `DELETE /api/projects/{id}` (cascades to report) |
+
+All reads are owner-scoped server-side; a different user's project returns `403/404`. Analysis pushes the newest report plus `status` back to the database in the background workflow.
+
+## Role-Based Access Control (RBAC) ![RBAC](https://img.shields.io/badge/RBAC-8b5cf6?style=flat-square&logo=shield&logoColor=white)
+
+- **Roles:** `user` (default) and `admin`. Stored on the `users` table (`role` column) and embedded in JWT claims for convenience.
+- **Provisioning:** emails listed in the `ADMIN_EMAILS` env var are promoted to `admin` at startup (idempotent, case-insensitive).
+- **Enforcement:** `require_role(...)` dependency (`backend/api/deps.py`) re-reads the role from the **database row on every request** — a forged JWT claiming `role=admin` is still rejected, because the token claim is never trusted. `get_current_admin` guards `GET /api/admin/summary` (admins see platform counts; regular users get `403`).
+- **Frontend:** `GET /api/auth/me` returns the current user's role so the dashboard can show the Admin panel — but this is presentation only; access control is enforced server-side.
+
+**Role checks are verified by tests** (`tests/test_rbac.py`, `tests/test_admin.py`): default role, role claim in tokens, `ADMIN_EMAILS` promotion, `require_role` allow/deny, and non-admin `403` against the admin endpoint.
+
+## Search & Filtering ![Search & Filtering](https://img.shields.io/badge/Search%20%26%20Filtering-0ea5e9?style=flat-square&logo=search&logoColor=white)
+
+- **Search:** case-insensitive match on `title`, `description` and `industry` — executed **server-side** with a 400 ms debounce on the client.
+- **Status filter:** `all / completed / analyzing / pending / failed` buttons, sent as a query param.
+- **Pagination:** skip/limit paging with a "Load More Ideas" button (page size 100); search, filter and pagination compose because the filter lives on the server.
+- **Polling:** while any project is `analyzing`, the dashboard refreshes statuses every 4 seconds (3 seconds on the detail page) so completed runs appear without a manual reload.
+
+---
+
 ## Testing & Quality ![Testing & Quality](https://img.shields.io/badge/Testing%20%26%20Quality-22c55e?style=flat-square&logo=flask&logoColor=white)
 
-### Backend — pytest (49 tests)
+### Backend — pytest (55 tests)
 
 ```bash
 cd backend
 venv\Scripts\python.exe -m pytest tests -q
-# 49 passed — auth (10) · projects (10) · reports (6) · orchestrator (3) · agents (7) · rbac (7) · cookie-auth (6)
+# 55 passed — auth (10) · projects (10) · reports (6) · orchestrator (3) · agents (7) · rbac (7) · cookie-auth (6) · admin (6)
 ```
 
 Covered behaviors include:
@@ -602,7 +699,8 @@ Covered behaviors include:
 - **Reports**: ownership enforcement (403), 404 handling, auth requirement, and **server-side PDF export** (valid PDF bytes, correct content-type, download filename, and cross-user 403 on the `/pdf` endpoint).
 - **Orchestrator**: full 4-section report shape (three specialists + executive verdict), failure propagation from any agent.
 - **Agents**: strict JSON extraction (markdown fences rejected, missing/invalid JSON raises), and default model check (`openai/gpt-oss-120b`).
-- **RBAC**: default `user` role on registration, role embedded in JWT claims, admin promotion via `ADMIN_EMAILS`, and `require_role` enforcement (403 for the wrong role).
+- **RBAC**: default `user` role on registration, role embedded in JWT claims, admin promotion via `ADMIN_EMAILS`, `require_role` enforcement (403 for the wrong role), and **DB-row (not token-claim) role enforcement against a forged admin token**.
+- **Admin**: current-user profile endpoint (`/api/auth/me`), admin-only `/api/admin/summary` returning 403 for regular users, 401 unauthenticated, and correct aggregated counts for admins.
 - **Cookie auth**: HttpOnly session cookie set on login, cookie-only requests authenticate, CSRF Origin-check on cookie-authenticated unsafe requests, and logout clearing the session.
 
 ### Frontend — quality gates
@@ -611,11 +709,24 @@ Covered behaviors include:
 cd frontend
 npx tsc --noEmit      # typecheck
 npm run lint          # ESLint
-npm run test          # Vitest (21 tests)
+npm run test          # Vitest (23 tests)
 npm run build         # production build
 ```
 
-All four gates are green in CI-style local runs (zero TypeScript errors, zero lint errors, 21 passing Vitest tests, successful production build).
+All four gates are green in CI-style local runs (zero TypeScript errors, zero lint errors, 23 passing Vitest tests, successful production build).
+
+---
+
+## CI/CD ![CI/CD](https://img.shields.io/badge/CI%2FCD-374151?style=flat-square&logo=githubactions&logoColor=white)
+
+GitHub Actions (`.github/workflows/ci.yml`) runs automatically on every push to `main` and on pull requests. It validates both tiers — no secrets are exposed to the workflow:
+
+| Job | What it runs | Gates |
+| --- | ------------ | ----- |
+| **Backend** (`python 3.12`) | `python -m pytest tests -q` | All 55 backend tests |
+| **Frontend** (`node 22`) | `npm run lint` · `npx tsc --noEmit` · `npm run test` · `npm run build` | Lint, TypeScript, 23 Vitest tests, production build |
+
+The workflow only reads public dependencies and code already in the repository; API keys and `SECRET_KEY` are never required for the pipeline (tests run with dummy/test keys).
 
 ---
 
@@ -634,6 +745,8 @@ All four gates are green in CI-style local runs (zero TypeScript errors, zero li
 ---
 
 ## Deployment ![Deployment](https://img.shields.io/badge/Deployment-0ea5e9?style=flat-square&logo=cloud&logoColor=white)
+
+**Live demo:** [https://startuplaunchai-aui.vercel.app](https://startuplaunchai-aui.vercel.app) · **Full deployment guide:** [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
 
 <table>
 <tr>
@@ -665,14 +778,14 @@ FastAPI + SQLite cannot persist on serverless. Deploy the backend on a long-runn
 
 ### Database Migrations
 
-Dev mode auto-creates tables (`create_all`) plus a guarded startup compatibility step that adds the `token_version` column to existing SQLite or Postgres databases. For production schema changes, use the checked-in Alembic migrations:
+Dev mode auto-creates tables (`create_all`) plus guarded startup compatibility steps that add the `token_version` and `role` columns to older databases. For production schema changes, use the checked-in Alembic migrations:
 
 ```bash
 cd backend
 alembic upgrade head
 ```
 
-Three migrations are provided: the initial schema, `analysis_started_at`, and `token_version` (revision chain `c6fe7409bd81 → a1b2c3d4e5f6 → b1b2c3d4e5f7`).
+Four migrations are provided, chained `c6fe7409bd81 → a1b2c3d4e5f6 → b1b2c3d4e5f7 → d3b5c7e9f0a1`: the initial schema, `analysis_started_at`, `token_version`, and `user role`.
 
 ---
 
@@ -695,7 +808,22 @@ Three migrations are provided: the initial schema, `analysis_started_at`, and `t
 
 ---
 
-## Roadmap ![Roadmap](https://img.shields.io/badge/Roadmap-f59e0b?style=flat-square&logo=map&logoColor=white)
+## Limitations ![Limitations](https://img.shields.io/badge/Limitations-f59e0b?style=flat-square&logo=info&logoColor=white)
+
+Honest, known limitations of the current implementation:
+
+| Area | Limitation |
+| ---- | ---------- |
+| AI knowledge | The default model (`openai/gpt-oss-120b`) answers from its own training knowledge. Live web search is opt-in via `GROQ_MODEL=groq/compound-mini`, which can hit intermittent `413 Request Entity Too Large` errors on Groq's free tier. Figures from agents are estimates, not market data subscriptions. |
+| Admin UI | Admin functionality is currently a platform-summary panel (counts). There is no user-management console (suspend, role change, delete user) — roles are provisioned via `ADMIN_EMAILS` at startup. |
+| Email flows | No email verification or password-reset emails (a roadmap item). Passwords are changed after login only. |
+| Rate limiter scope | Without `REDIS_URL`, rate limiting is in-process per worker. Multi-worker production deployments should set `REDIS_URL`. |
+| DB migrations in dev | Dev auto-creates tables (`create_all`); production schema evolution is intended to go through Alembic. |
+| Deliberate scale choices | No full-text index on search (uses `ILIKE`/`LIKE`), no image/CDN pipeline, no background task queue (FastAPI `BackgroundTasks` — fine for single-process, not a durable job queue). |
+
+---
+
+## Roadmap & Future Improvements ![Roadmap](https://img.shields.io/badge/Roadmap-f59e0b?style=flat-square&logo=map&logoColor=white)
 
 | Status   | Item                                                    |
 | :------: | ------------------------------------------------------- |
@@ -795,7 +923,7 @@ Contributions are welcome and appreciated. To contribute:
 Please keep the quality gates green before submitting:
 
 ```bash
-cd backend && python -m pytest tests -q           # all 49 tests pass
+cd backend && python -m pytest tests -q           # all 55 tests pass
 cd frontend && npx tsc --noEmit && npm run lint && npm run test
 ```
 

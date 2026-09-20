@@ -77,8 +77,20 @@ export interface AuthResponse {
 export interface User {
   id: number
   email: string
+  role: string
   is_active: boolean
   created_at: string
+}
+
+export interface AdminSummary {
+  users: number
+  projects: number
+  projects_by_status: {
+    completed: number
+    analyzing: number
+    failed: number
+    pending: number
+  }
 }
 
 // The JWT is kept in module-scope memory only (never localStorage, so an XSS
@@ -93,6 +105,17 @@ export function getToken(): string | null {
 
 export function setToken(token: string): void {
   memoryToken = token
+}
+
+// Current authenticated user; the role here only controls what UI is shown.
+// Authorization is always enforced server-side via require_role().
+export async function getCurrentUser(): Promise<User> {
+  return apiFetch<User>("/api/auth/me")
+}
+
+// Admin-only platform summary (server returns 403 for non-admin roles).
+export async function getAdminSummary(): Promise<AdminSummary> {
+  return apiFetch<AdminSummary>("/api/admin/summary")
 }
 
 export async function clearToken(): Promise<void> {
