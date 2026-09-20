@@ -177,7 +177,8 @@ All scoped to the authenticated owner (cross-user 403/404), verified by tests.
 ## 21. Accessibility
 
 - Semantic HTML, `<label htmlFor>` on all inputs, `aria-label`/`aria-pressed`/`aria-live` where meaningful, keyboard-usable buttons, focus-visible rings, color-coded statuses that are also labeled text, responsive layouts with reduced motion support (`motion-reduce`).
-- **Lighthouse / automated accessibility scores have not been measured from the coding environment and are intentionally not invented here.** They are scheduled to be measured on the deployed site (see docs/WEEK-4-TEST-CHECKLIST.md and docs/DEPLOYMENT.md) and added to this report before submission.
+- **Measured (Lighthouse/PageSpeed Insights, live site):** Accessibility **94** (remaining: contrast on some muted elements and one heading-order skip inside the demo card — fixable follow-ups). Best Practices **100**, SEO **100**, Agentic Browsing **2/2**.
+- Performance was measured at **94 in the first run and has since had targeted optimizations applied** (landing converted to a server component with client islands, legacy-JS removed via modern browser targets, dead font preconnects removed) — the latest score is to be re-measured on the deployed site and recorded here.
 
 ## 22. Testing and QA
 
@@ -225,7 +226,7 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on push to `main` and PRs:
 - Full Task 1 coverage: responsive UI, authentication, RBAC, DB persistence, CRUD, search/filter, validation, secure API integration, error handling, polished UX.
 - Full Task 2 coverage: env config, secrets hygiene, server-side authorization, rate limiting, security headers/CSP, logging, performance-oriented queries, deployment documentation, test checklist.
 - **Measured locally:** 55 backend tests and 23 frontend tests pass; typecheck, lint and production build are clean.
-- **To be measured on the deployed site (not invented here):** Lighthouse Performance / Accessibility / Best Practices / SEO scores, and manual mobile-device checks.
+- **Measured on the deployed site:** Accessibility 94, Best Practices 100, SEO 100, Agentic Browsing 2/2 (Lighthouse/PageSpeed). Performance optimizations shipped (server-component landing, no legacy JS, dead preconnects removed); the final Performance score is to be re-measured after this batch is deployed.
 
 ## 28. Limitations
 

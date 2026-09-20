@@ -97,16 +97,18 @@ Status legend:
 | 39 | Keyboard navigation | PASS (code) / NOT TESTED (manual) | All actions are buttons/links with focus-visible styles; a manual keyboard-only pass has not been performed. |
 | 40 | Form labels | PASS | `htmlFor` labels on all inputs (login/register/new-project). |
 | 41 | Visible focus states | PASS (code) | `focus-visible:ring-*` used throughout; visual confirmation pending. |
-| 42 | Lighthouse accessibility score | NOT TESTED | Must be measured on the deployed site; result to be added to the final report. Do not invent. |
+| 42 | Lighthouse accessibility score | PASS | Measured **94** on the deployed site (Lighthouse/PageSpeed). Remaining items: contrast ratio + one heading-order skip inside the landing demo card. |
+| 43 | Lighthouse Best Practices + SEO | PASS | Best Practices **100**, SEO **100**, Agentic Browsing **2/2** (measured). |
+| 44 | Lighthouse Performance | PASS (improved) | Initial score 94 with noted diagnostics (legacy JS, render-blocking, DOM). Fixes shipped: landing → server component (client islands only), legacy-JS removed via modern `browserslist`, dead font preconnects dropped. **Re-measure after deployment and record the final score.** |
 
 ## Production
 
 | # | Check | Status | Evidence |
 | - | ----- | ------ | -------- |
-| 43 | Environment variables documented | PASS | `backend/.env.example`, `frontend/.env.example`, README env tables, `docs/DEPLOYMENT.md`. |
-| 44 | Production build | PASS | `npm run build` succeeded locally (Next.js 16.2.7, 11 routes). |
-| 45 | Deployed application reachable | NOT TESTED | Assumes the live URL; final confirmation must be done by the student. |
-| 46 | Frontend ↔ backend API connection in production | NOT TESTED | Requires the deployed backend to be reachable with a real `NEXT_PUBLIC_API_URL`; verify manually. |
+| 45 | Environment variables documented | PASS | `backend/.env.example`, `frontend/.env.example`, README env tables, `docs/DEPLOYMENT.md`. |
+| 46 | Production build | PASS | `npm run build` succeeded locally (Next.js 16.2.7, 11 routes). |
+| 47 | Deployed application reachable | NOT TESTED | Assumes the live URL; final confirmation must be done by the student. |
+| 48 | Frontend ↔ backend API connection in production | NOT TESTED | Requires the deployed backend to be reachable with a real `NEXT_PUBLIC_API_URL`; verify manually. |
 
 ---
 

@@ -72,10 +72,6 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${outfit.variable} ${jakarta.variable} h-full antialiased`}
     >
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      </head>
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground selection:bg-indigo-500/30 selection:text-indigo-200">
         <ThemeProvider
           attribute="class"
