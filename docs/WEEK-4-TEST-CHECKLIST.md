@@ -99,7 +99,7 @@ Status legend:
 | 41 | Visible focus states | PASS (code) | `focus-visible:ring-*` used throughout; visual confirmation pending. |
 | 42 | Lighthouse accessibility score | PASS | Measured **94** on the deployed site (Lighthouse/PageSpeed). Remaining items: contrast ratio + one heading-order skip inside the landing demo card. |
 | 43 | Lighthouse Best Practices + SEO | PASS | Best Practices **100**, SEO **100**, Agentic Browsing **2/2** (measured). |
-| 44 | Lighthouse Performance | PASS (improved) | Initial score 94 with noted diagnostics (legacy JS, render-blocking, DOM). Fixes shipped: landing → server component (client islands only), legacy-JS removed via modern `browserslist`, dead font preconnects dropped. **Re-measure after deployment and record the final score.** |
+| 44 | Lighthouse Performance | PASS (improved) | Failing on the first run (diagnostics: render-blocking requests, legacy JS ~14 KiB, optimize DOM size, long main-thread tasks). Fixes shipped: landing → server component (client islands only), legacy-JS removed via modern `browserslist`, dead font preconnects dropped. **Re-measure after deployment and record the final score.** |
 
 ## Production
 

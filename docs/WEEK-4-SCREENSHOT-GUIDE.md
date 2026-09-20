@@ -3,7 +3,7 @@
 **Repo:** https://github.com/afaqulislam/startuplaunch-ai
 **Live demo:** https://startuplaunchai-aui.vercel.app
 
-How to capture the evidence screenshots for the submission. All screenshots come from the **deployed** live site (real browser, real data), so save them with the live backend connected and a real analysis completed. Store them in `docs/screenshots/` and link them in the final report.
+How to capture the evidence screenshots for the submission. All screenshots come from the **deployed** live site (real browser, real data), so save them with the live backend connected and a real analysis completed. Store them in `docs/screenshots/` (individual PNGs per the list below, **or** a single consolidated PDF export — e.g. `docs/screenshots/startuplaunch-ai.pdf` — is also acceptable) and link them in the final report.
 
 Filename pattern: `01-landing.png`, `02-login.png`, … (see table below). Use default laptop/desktop window size and the light theme unless noted.
 

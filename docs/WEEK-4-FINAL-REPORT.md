@@ -178,7 +178,7 @@ All scoped to the authenticated owner (cross-user 403/404), verified by tests.
 
 - Semantic HTML, `<label htmlFor>` on all inputs, `aria-label`/`aria-pressed`/`aria-live` where meaningful, keyboard-usable buttons, focus-visible rings, color-coded statuses that are also labeled text, responsive layouts with reduced motion support (`motion-reduce`).
 - **Measured (Lighthouse/PageSpeed Insights, live site):** Accessibility **94** (remaining: contrast on some muted elements and one heading-order skip inside the demo card — fixable follow-ups). Best Practices **100**, SEO **100**, Agentic Browsing **2/2**.
-- Performance was measured at **94 in the first run and has since had targeted optimizations applied** (landing converted to a server component with client islands, legacy-JS removed via modern browser targets, dead font preconnects removed) — the latest score is to be re-measured on the deployed site and recorded here.
+- Performance was failing on the first run (diagnostics: render-blocking requests, legacy JS ~14 KiB, optimize DOM size, long main-thread tasks) and has since had targeted optimizations applied (landing converted to a server component with client islands, legacy-JS removed via modern browser targets, dead font preconnects removed). The latest score is to be re-measured on the deployed site and recorded here.
 
 ## 22. Testing and QA
 
